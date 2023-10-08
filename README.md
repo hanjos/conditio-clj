@@ -10,6 +10,55 @@ A condition system, like the one in Common Lisp, provides a more general solutio
 
 # Why?
 
-I haven't used Clojure in _years_, so this idea seemed as good an excuse as any :smile: It's a good opportunity to remove some cobwebs and check out some stuff, such as `deps.edn`, transducers, maybe `spec` (I said it has been some time...).
+I haven't used Clojure in _years_, so this idea seemed as good an excuse as any :smile: 
 
-Let's see how far I go...
+It's a good opportunity to remove some cobwebs and check out some "new" stuff, such as `deps.edn`, transducers, maybe `spec` (I said it has been some time...). Let's see how far I go...
+
+# How?
+
+Well, with `binding` and dynamic variables, most of the machinery is already there, so life is a lot easier :smile:
+
+The end result should look something like this:
+
+```clojure
+(ns user
+  (:require [org.sbrubbles.conditio :as c]))
+
+; This example draws from Practical Common Lisp, but with some shortcuts 
+; to simplify matters 
+
+(defn parse-log-entry [line]
+  (if (not (= line :fail)) ; :fail represents a malformed log entry
+    line
+    ; adds :user/use-value and :user/retry-with as available restarts.
+    (c/with-restarts [::use-value identity 
+                      ::retry-with #(parse-log-entry %)]
+      (c/signal ::malformed-log-entry line)))) ; signals :user/malformed-log-entry
+
+(defn parse-log-file []
+  ; wraps parse-log-entry in a context with :user/skip-entry as a restart  
+  (comp (map (c/with-restarts-fn parse-log-entry
+                                 {::skip-entry (fn [& _] ::skip-entry)}))
+        (filter #(not (= % ::skip-entry)))))
+
+(defn analyze-logs [& args]
+  ; handles :user/malformed-log-entry conditions, selecting 
+  ; :user/skip-entry as the restart to use
+  (c/handle [::malformed-log-entry (c/use-restart ::skip-entry)]
+    (into []
+          (comp cat
+                (parse-log-file))
+          args)))
+
+; every vector is a 'file' for parse-log-file purposes
+(analyze-logs ["a" "b"]
+              ["c" :fail :fail]
+              [:fail "d" :fail "e"])
+```
+
+# Using
+
+`deps.edn`. Still gotta figure out how to generate and publish versions, but that shouldn't be too hard...
+
+# Caveats and stuff to mull over
+* Despite what the name similarity might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, but might complicate the implementation.
