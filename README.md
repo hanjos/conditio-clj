@@ -62,3 +62,4 @@ The end result should look something like this:
 
 # Caveats and stuff to mull over
 * Despite what the name similarity might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, but might complicate the implementation.
+* An alternative implementation uses vars instead of keywords. I'm not sure which one works better; so some experiments are in order...
