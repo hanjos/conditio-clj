@@ -7,24 +7,52 @@
     [clojure.test.check.properties :as prop]
     [org.sbrubbles.conditio :as c]))
 
-(defspec handle-test
-  100
-  (prop/for-all [keyword (gen/such-that #(not (#{::c/handler-not-found ::c/restart-not-found} %))
-                                        gen/keyword)
-                 value gen/any]
-    (is (not (c/*handlers* keyword)))
-    (c/handle [keyword value]
-      (is (= (c/*handlers* keyword) value)))
-    (is (not (c/*handlers* keyword)))))
+(deftest signal-test
+  (testing "signal calls the handler it gets if it finds one"
+    (c/handle [:test inc]
+      (is (= (c/signal :test 1) 2))))
 
-(defspec with-restart-test
+  (testing "the default behavior is to explode if given an unknown condition"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Handler not found"
+                          (c/signal :nonexistent 1 2 3))))
+
+  (testing "signal signals ::c/handler-not-found if it doesn't find the given one"
+    (c/handle [::c/handler-not-found identity]
+      (is (= (c/signal :nonexistent 1) :nonexistent)))))
+
+(deftest use-restart-test
+  (testing "use-restart returns the restart if it finds one"
+    (c/with-restarts [:test inc]
+      (is (= ((c/use-restart :test 1))
+             (inc 1)))))
+
+  (testing "the default behavior is to explode if given an unknown restart"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Restart not found"
+                          ((c/use-restart :nonexistent)))))
+
+  (testing "use-restart signals ::c/restart-not-found if it doesn't find the given restart"
+    (c/handle [::c/restart-not-found (fn [& _] :test)]
+      (is (= ((c/use-restart :nonexistent 1))
+             :test)))))
+
+(defspec handle-registers-handlers-only-in-its-context
   100
-  (prop/for-all [keyword gen/keyword
+  (prop/for-all [id (gen/such-that #(not (#{::c/handler-not-found ::c/restart-not-found} %))
+                                   gen/any-equatable)
                  value gen/any]
-    (is (not (c/*restarts* keyword)))
-    (c/with-restarts [keyword value]
-      (is (= (c/*restarts* keyword) value)))
-    (is (not (c/*restarts* keyword)))))
+    (is (not (c/*handlers* id)))
+    (c/handle [id value]
+      (is (= (c/*handlers* id) value)))
+    (is (not (c/*handlers* id)))))
+
+(defspec with-restart-registers-restarts-only-in-its-context
+  100
+  (prop/for-all [id gen/any-equatable
+                 value gen/any]
+    (is (not (c/*restarts* id)))
+    (c/with-restarts [id value]
+      (is (= (c/*restarts* id) value)))
+    (is (not (c/*restarts* id)))))
 
 (defspec abort-takes-anything-as-message
   100
