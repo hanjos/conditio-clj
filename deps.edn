@@ -2,4 +2,31 @@
 
  :aliases
  {:dev
-  {:extra-deps {org.clojure/tools.trace {:mvn/version "0.7.11"}}}}}
+  {:extra-deps {org.clojure/tools.trace {:mvn/version "0.7.11"}}}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
+
+  ;; clojure -X:test/run
+  ;; clojure -X:test/run :fail-fast? false
+  :test/run
+  {:extra-paths ["test"]
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.86.1355"}
+                org.clojure/test.check {:mvn/version "1.1.1"}}
+   :main-opts   ["--main" "kaocha.runner"]
+   :exec-fn kaocha.runner/exec-fn
+   :exec-args {:randomize? false
+               :fail-fast? false}}
+
+  ;; Kaocha test runner in watch mode
+  ;; clojure -X:test/watch
+  :test/watch
+  {:extra-paths ["test"]
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.86.1355"}
+                org.clojure/test.check {:mvn/version "1.1.1"}}
+   :main-opts   ["--main" "kaocha.runner" "--watch" "--fail-fast" "--skip-meta" ":slow"]
+   :exec-fn kaocha.runner/exec-fn
+   :exec-args {:watch? true
+               :randomize? false
+               :fail-fast? true}}}}
