@@ -30,15 +30,17 @@ The end result should look something like this:
 (defn parse-log-entry [line]
   (if (not (= line :fail)) ; :fail represents a malformed log entry
     line
-    ; adds :user/use-value and :user/retry-with as available restarts.
-    (c/with-restarts [::use-value identity 
-                      ::retry-with #(parse-log-entry %)]
-      (c/signal ::malformed-log-entry line)))) ; signals :user/malformed-log-entry
+    ; adds :user/use-value and :user/retry-with as available restarts
+    (c/with-restarts [::use-value identity
+                      ::retry-with parse-log-entry]
+                     ; signals :user/malformed-log-entry               
+                     (c/signal ::malformed-log-entry line))))
 
 (defn parse-log-file []
-  ; wraps parse-log-entry in a context with :user/skip-entry as a restart  
+  ; creates a function which calls parse-log-entry with :user/skip-entry 
+  ; available as a restart  
   (comp (map (c/with-restarts-fn parse-log-entry
-                                 {::skip-entry (fn [& _] ::skip-entry)}))
+                                 {::skip-entry (fn [] ::skip-entry)}))
         (filter #(not (= % ::skip-entry)))))
 
 (defn analyze-logs [& args]
@@ -50,10 +52,11 @@ The end result should look something like this:
                 (parse-log-file))
           args)))
 
-; every vector is a 'file' for parse-log-file purposes
+; every vector is a 'file'
 (analyze-logs ["a" "b"]
               ["c" :fail :fail]
               [:fail "d" :fail "e"])
+;; => ["a" "b" "c" "d" "e"]
 ```
 
 # Using

@@ -1,10 +1,19 @@
 (ns org.sbrubbles.conditio)
 
+(defn abort
+  ([] (abort "Abort"))
+  ([msg] (fn [& args]
+           (let [first-arg (first args)
+                 suffix (or (and first-arg
+                                 (or (and (> (count args) 1)
+                                          (str " (" first-arg ", ...)"))
+                                     (str " (" first-arg ")")))
+                            "")]
+             (throw (ex-info (str msg suffix) {:args args}))))))
+
 (def ^:dynamic *handlers*
-  {::handler-not-found #(throw (ex-info (str "Handler not found (" % ")")
-                                        {:condition %}))
-   ::restart-not-found #(throw (ex-info (str "Restart not found (" % ")")
-                                        {:option %}))})
+  {::handler-not-found (abort "Handler not found")
+   ::restart-not-found (abort "Restart not found")})
 
 (def ^:dynamic *restarts*
   {})
@@ -28,7 +37,7 @@
 (defmacro with-restarts
   [bindings & body]
   `(binding [*restarts* (merge *restarts* (hash-map ~@bindings))]
-      ~@body))
+     ~@body))
 
 (defn use-restart
   [option & args]
