@@ -71,6 +71,9 @@
                  value gen/any-equatable]
     (let [f (c/use-restart id)
           with-restarts-f (c/with-restarts-fn f {id (fn [] value)})]
+
+      (is (thrown-with-msg? ExceptionInfo #"Restart not found" (f)))
+
       (c/with-restarts [id (fn [] value)]
         (is (= (f) value)))
 
