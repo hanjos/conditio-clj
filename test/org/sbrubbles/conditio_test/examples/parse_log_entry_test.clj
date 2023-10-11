@@ -1,7 +1,8 @@
 (ns org.sbrubbles.conditio-test.examples.parse-log-entry-test
   (:require
     [clojure.test :refer :all]
-    [org.sbrubbles.conditio :as c]))
+    [org.sbrubbles.conditio :as c])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:dynamic *selected-restart* ::skip-entry)
 
@@ -9,7 +10,7 @@
 
 (defn parse-log-entry [line]
   (if (not (= line :fail))
-    (str "> " line)
+    (str ">>> " line)
     (c/with-restarts [::use-value identity
                       ::retry-with parse-log-entry]
       (c/signal ::malformed-log-entry line))))
@@ -27,22 +28,28 @@
           args)))
 
 ;; helper test fixture
-(defn bind-with-restart [f selected-restart]
+(defn select-restart [f selected-restart]
   (binding [*selected-restart* selected-restart]
     (bound-fn* f)))
 
 (deftest analyze-logs-test
   (are [f input expected] (= (apply f input) expected)
-       (bind-with-restart analyze-logs (c/use-restart ::skip-entry))
+       ; everything except :fail is parsed
+       (select-restart analyze-logs (c/use-restart ::skip-entry))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
-       ["> a" "> b" "> c" "> d" "> e"]
+       [">>> a" ">>> b" ">>> c" ">>> d" ">>> e"]
 
-       (bind-with-restart analyze-logs (c/use-restart ::use-value "X"))
+       ; :fail's are replaced with "X", no parsing
+       (select-restart analyze-logs (c/use-restart ::use-value "X"))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
-       ["> a" "> b" "> c" "X" "X" "X" "> d" "X" "> e"]
+       [">>> a" ">>> b" ">>> c" "X" "X" "X" ">>> d" "X" ">>> e"]
 
-       (bind-with-restart analyze-logs (c/use-restart ::retry-with "X"))
+       ; :fail's are reparsed with "X" as input instead
+       (select-restart analyze-logs (c/use-restart ::retry-with "X"))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
-       ["> a" "> b" "> c" "> X" "> X" "> X" "> d" "> X" "> e"]))
+       [">>> a" ">>> b" ">>> c" ">>> X" ">>> X" ">>> X" ">>> d" ">>> X" ">>> e"]))
 
-
+(deftest abort-analyze
+  (let [analyze-log* (select-restart analyze-logs (c/abort "Abort"))]
+    (is (thrown-with-msg? ExceptionInfo #"Abort"
+                          (analyze-log* ["a" :fail])))))

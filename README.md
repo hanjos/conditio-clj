@@ -32,9 +32,9 @@ The end result should look something like this:
     line
     ; adds :user/use-value and :user/retry-with as available restarts
     (c/with-restarts [::use-value identity
-                      ::retry-with parse-log-entry]
-                     ; signals :user/malformed-log-entry               
-                     (c/signal ::malformed-log-entry line))))
+                      ::retry-with parse-log-entry] 
+      ; signals :user/malformed-log-entry               
+      (c/signal ::malformed-log-entry line))))
 
 (defn parse-log-file []
   ; creates a function which calls parse-log-entry with :user/skip-entry 
