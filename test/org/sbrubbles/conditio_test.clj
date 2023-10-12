@@ -9,7 +9,7 @@
     (clojure.lang ExceptionInfo)))
 
 ;; conditions
-(def gen-id (gen/such-that #(not (nil? %)) gen/any))
+(def gen-id (gen/such-that #(not (nil? %)) gen/any-equatable))
 (def gen-condition (gen/let [id gen-id
                              map (gen/map gen/any gen/any)]
                      (c/condition id map)))
@@ -42,6 +42,13 @@
 (deftest signal-signals-handler-not-found
   (c/handle [::c/handler-not-found #(::c/id (:condition %))]
     (is (= (c/signal :nonexistent) :nonexistent))))
+
+(defspec signal-signals-the-given-condition-unchanged
+  100
+  (prop/for-all [con gen-condition]
+    (let [id (::c/id con)]
+      (c/handle [id identity]
+        (is (identical? (c/signal con) con))))))
 
 ;; restart
 (deftest restart-runs-the-given-restart

@@ -46,13 +46,13 @@
 
 (defn signal
   "Signals a condition, returning whatever the handler for that condition
-  returns.
+  returns. The arguments will be used to create the condition to signal.
 
   This function itself signals
   :org.sbrubbles.conditio/handler-not-found if a handler couldn't be found."
   [id & {:as args}]
   (let [c (condition id args)]
-    (if-let [handler (*handlers* id)]
+    (if-let [handler (*handlers* (::id c))]
       (handler c)
       (signal ::handler-not-found :condition c))))
 
