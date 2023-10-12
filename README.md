@@ -1,5 +1,7 @@
 A simple condition system for Clojure, without too much machinery.
 
+[![CI](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml/badge.svg)](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml)
+
 # What 
 
 Exception systems divide responsibilities in two parts: _signalling_ the exception (like `throw`), and _handling_ it (like `try/catch`), unwinding the call stack until a handler is found. The problem is, by the time the error reaches the right handler, the context that signalled the exception is mostly gone. This limits the recovery options available.
