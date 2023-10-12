@@ -34,7 +34,7 @@ The end result should look something like this:
     (c/with [::use-value identity
              ::retry-with parse-log-entry]
             ; signals :user/malformed-log-entry 
-            (c/signal ::malformed-log-entry line))))
+            (c/signal ::malformed-log-entry :line line))))
 
 (defn parse-log-file []
   ; creates a function which calls parse-log-entry with :user/skip-entry 

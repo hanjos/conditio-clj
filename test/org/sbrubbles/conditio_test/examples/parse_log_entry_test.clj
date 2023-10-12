@@ -13,7 +13,7 @@
     (str ">>> " line)
     (c/with [::use-value identity
              ::retry-with parse-log-entry]
-            (c/signal ::malformed-log-entry line))))
+            (c/signal ::malformed-log-entry :line line))))
 
 (defn parse-log-file []
   (comp (map (c/with-fn parse-log-entry

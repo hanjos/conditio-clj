@@ -29,16 +29,24 @@
     (fn [& args]
       (apply with-bindings* bindings f args))))
 
+(defn condition
+  "Creates a new condition. A condition is a map with
+  an :org.sbrubbles.conditio/id key, which is used to identify a handler
+  for it."
+  [id & {:as map}]
+  (assoc map ::id id))
+
 (defn signal
   "Signals a new condition, returning whatever the handler for that condition
   returns.
 
   This function itself signals
   :org.sbrubbles.conditio/handler-not-found if a handler couldn't be found."
-  [condition & args]
-  (if-let [handler (*handlers* condition)]
-    (apply handler args)
-    (signal ::handler-not-found condition)))
+  [condition-id & {:as args}]
+  (let [c (condition condition-id args)]
+    (if-let [handler (*handlers* condition-id)]
+      (handler c)
+      (signal ::handler-not-found :condition c))))
 
 (defn with-fn
   "Returns a function, which will install the given restarts and then run
@@ -68,10 +76,13 @@
   (fn [& _]
     (if-let [restart (*restarts* option)]
       (apply restart args)
-      (signal ::restart-not-found option))))
+      (signal ::restart-not-found :option option))))
 
 (defmacro handle
-  "Takes a map of keyword/handler pairs. Then this macro:
+  "Takes a map of keyword/handler pairs. A handler is a function which takes
+  a condition and returns the value signal should return.
+
+  This macro:
 
   (1) installs the given handlers as a thread-local binding;
   (2) executes the given body;

@@ -11,16 +11,16 @@
 
 (deftest signal-test
   (testing "signal calls the handler it gets if it finds one"
-    (c/handle [:test inc]
-      (is (= (c/signal :test 1) 2))))
+    (c/handle [:test #(inc (:input %))]
+      (is (= (c/signal :test :input 1) 2))))
 
   (testing "the default behavior is to explode if given an unknown condition"
     (is (thrown-with-msg? ExceptionInfo #"Handler not found"
-                          (c/signal :nonexistent 1 2 3))))
+                          (c/signal :nonexistent :input 1))))
 
   (testing "signal signals ::c/handler-not-found if it doesn't find the given one"
-    (c/handle [::c/handler-not-found identity]
-      (is (= (c/signal :nonexistent 1) :nonexistent)))))
+    (c/handle [::c/handler-not-found #(::c/id (:condition %))]
+      (is (= (c/signal :nonexistent) :nonexistent)))))
 
 (deftest use-restart-test
   (testing "use-restart returns the restart if it finds one"
