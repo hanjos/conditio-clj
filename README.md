@@ -32,7 +32,7 @@ The end result should look something like this:
 (defn parse-log-entry [line]
   (if (not (= line :fail)) ; :fail represents a malformed log entry
     line
-    ; adds :user/use-value and :user/retry-with as available restarts
+    ; adds :user/retry-with as an available restart
     (c/with [::retry-with parse-log-entry]
             ; signals :user/malformed-log-entry 
             (c/signal ::malformed-log-entry :line line))))
