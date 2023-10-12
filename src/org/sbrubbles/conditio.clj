@@ -1,16 +1,22 @@
 (ns org.sbrubbles.conditio)
 
-(defn condition
-  "Creates a new condition. A condition is a map with
-  an :org.sbrubbles.conditio/id key, which is used to identify a handler
-  for it."
-  [id & {:as map}]
-  (assoc map ::id id))
-
 (defn condition?
   "Checks if the given value is a condition."
   [v]
   (and (map? v) (contains? v ::id)))
+
+(defn condition
+  "Creates a new condition. A condition is a map with
+  an :org.sbrubbles.conditio/id key (with a non-nil value), which is used to
+  identify a handler for it.
+
+  This function, if given only a prebuilt condition, will return it unchanged.
+  Otherwise, it will create a new condition with the given arguments."
+  [id & {:as map}]
+  (assert (not (nil? id)))
+  (if (nil? map)
+    (if (condition? id) id {::id id})
+    (assoc map ::id id)))
 
 (defn abort
   "Takes an optional condition, and aborts by throwing an exception."

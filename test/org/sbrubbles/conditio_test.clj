@@ -9,6 +9,28 @@
   (:import
     (clojure.lang ExceptionInfo)))
 
+;; conditions
+(def gen-id (gen/such-that #(not (nil? %)) gen/any))
+(def gen-condition (gen/let [id gen-id
+                             map (gen/map gen/any gen/any)]
+                     (c/condition id map)))
+
+(defspec a-given-condition-doesnt-change-in-condition
+  100
+  (prop/for-all [con gen-condition]
+    (is (identical? (c/condition con) con))))
+
+(defspec condition-id-creates-a-new-condition
+  100
+  (prop/for-all [id gen-id]
+    (is (= (::c/id (c/condition id))
+           id))))
+
+(deftest condition-id-cannot-be-nil
+  (is (thrown? AssertionError
+               (c/condition nil))))
+
+;; signal
 (deftest signal-test
   (testing "signal calls the handler it gets if it finds one"
     (c/handle [:test #(inc (:input %))]
@@ -22,7 +44,8 @@
     (c/handle [::c/handler-not-found #(::c/id (:condition %))]
       (is (= (c/signal :nonexistent) :nonexistent)))))
 
-(deftest use-restart-test
+;; restart
+(deftest restart-test
   (testing "use-restart returns the restart if it finds one"
     (c/with [:test inc]
             (is (= (c/restart :test 1)
@@ -37,11 +60,13 @@
       (is (= (c/restart :nonexistent 1)
              :test)))))
 
+;; abort
 (deftest abort-test
   (testing "abort returns a function which explodes when called"
     (is (thrown-with-msg? ExceptionInfo #"Abort"
                  (c/abort)))))
 
+;; handle
 (defspec handle-registers-handlers-only-in-its-context
   100
   (prop/for-all [id (gen/such-that #(not (#{::c/handler-not-found ::c/restart-not-found} %))
@@ -54,7 +79,8 @@
 
     (is (not (c/*handlers* id)))))
 
-(defspec with-restart-registers-restarts-only-in-its-context
+;; with and with-fn
+(defspec with-registers-restarts-only-in-its-context
   100
   (prop/for-all [id gen/any-equatable
                  value gen/any]
@@ -65,7 +91,7 @@
 
     (is (not (c/*restarts* id)))))
 
-(defspec with-restart-fn-works-just-like-with-restarts
+(defspec with-fn-works-just-like-with-restarts
   100
   (prop/for-all [id gen/any-equatable
                  value gen/any-equatable]
