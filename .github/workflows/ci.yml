@@ -39,7 +39,7 @@ jobs:
 
       - name: Run tests
         run: |
-          clojure -X:test/run
+          clojure -X:test
 
       - name: Lint
         run: |
