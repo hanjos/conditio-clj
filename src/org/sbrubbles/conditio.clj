@@ -37,7 +37,7 @@
   {})
 
 (defn- bind-fn-with*
-  "Like bound-fn*, but binding the given map as well along with the thread
+  "Like bound-fn*, but binding the given map along with the thread
    bindings."
   [f map]
   (let [bindings (merge (get-thread-bindings) map)]
