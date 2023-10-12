@@ -1,21 +1,30 @@
 (ns org.sbrubbles.conditio)
 
+(defn condition
+  "Creates a new condition. A condition is a map with
+  an :org.sbrubbles.conditio/id key, which is used to identify a handler
+  for it."
+  [id & {:as map}]
+  (assoc map ::id id))
+
+(defn condition?
+  "Checks if the given value is a condition."
+  [v]
+  (and (map? v) (contains? v ::id)))
+
 (defn abort
-  "Returns a restart which aborts by throwing an exception."
-  ([] (abort "Abort"))
-  ([msg] (fn [& args]
-           (let [first-arg (first args)
-                 suffix (or (and first-arg
-                                 (or (and (> (count args) 1)
-                                          (str " (" first-arg ", ...)"))
-                                     (str " (" first-arg ")")))
-                            "")]
-             (throw (ex-info (str msg suffix) {:args args}))))))
+  "Takes an optional condition, and aborts by throwing an exception."
+  ([] (abort nil))
+  ([c]
+   (let [msg (cond (nil? c) "Abort"
+                   (condition? c) (str "Abort: " (::id c))
+                   :else (str "Abort on " c))]
+     (throw (ex-info msg {:args c})))))
 
 (def ^:dynamic *handlers*
   "The known handlers. Use handle to register new handlers."
-  {::handler-not-found (abort "Handler not found")
-   ::restart-not-found (abort "Restart not found")})
+  {::handler-not-found abort
+   ::restart-not-found abort})
 
 (def ^:dynamic *restarts*
   "The known restarts. Use with to register new restarts."
@@ -28,13 +37,6 @@
   (let [bindings (merge (get-thread-bindings) map)]
     (fn [& args]
       (apply with-bindings* bindings f args))))
-
-(defn condition
-  "Creates a new condition. A condition is a map with
-  an :org.sbrubbles.conditio/id key, which is used to identify a handler
-  for it."
-  [id & {:as map}]
-  (assoc map ::id id))
 
 (defn signal
   "Signals a new condition, returning whatever the handler for that condition
@@ -67,16 +69,15 @@
      ~@body))
 
 (defn restart
-  "Returns a function, which searches for a restart mapped to the given
-  option, and then runs it with args.
+  "Searches for a restart mapped to the given option, and then runs it with
+  args.
 
   Signals :org.sbrubbles.conditio/restart-not-found if no restart mapped to
   option could be found."
   [option & args]
-  (fn [& _]
-    (if-let [restart (*restarts* option)]
-      (apply restart args)
-      (signal ::restart-not-found :option option))))
+  (if-let [restart (*restarts* option)]
+    (apply restart args)
+    (signal ::restart-not-found :option option)))
 
 (defmacro handle
   "Takes a map of keyword/handler pairs. A handler is a function which takes

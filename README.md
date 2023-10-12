@@ -46,7 +46,7 @@ The end result should look something like this:
 (defn analyze-logs [& args]
   ; handles :user/malformed-log-entry conditions, selecting 
   ; :user/skip-entry as the restart to use
-  (c/handle [::malformed-log-entry (c/restart ::skip-entry)]
+  (c/handle [::malformed-log-entry (fn [_] (c/restart ::skip-entry))]
     (into []
           (comp cat
                 (parse-log-file))

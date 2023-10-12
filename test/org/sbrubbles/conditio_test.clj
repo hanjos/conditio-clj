@@ -15,7 +15,7 @@
       (is (= (c/signal :test :input 1) 2))))
 
   (testing "the default behavior is to explode if given an unknown condition"
-    (is (thrown-with-msg? ExceptionInfo #"Handler not found"
+    (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/handler-not-found"
                           (c/signal :nonexistent :input 1))))
 
   (testing "signal signals ::c/handler-not-found if it doesn't find the given one"
@@ -25,22 +25,22 @@
 (deftest use-restart-test
   (testing "use-restart returns the restart if it finds one"
     (c/with [:test inc]
-            (is (= ((c/restart :test 1))
+            (is (= (c/restart :test 1)
                    (inc 1)))))
 
   (testing "the default behavior is to explode if given an unknown restart"
-    (is (thrown-with-msg? ExceptionInfo #"Restart not found"
-                          ((c/restart :nonexistent)))))
+    (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found"
+                          (c/restart :nonexistent))))
 
   (testing "use-restart signals ::c/restart-not-found if it doesn't find the given restart"
-    (c/handle [::c/restart-not-found (fn [& _] :test)]
-      (is (= ((c/restart :nonexistent 1))
+    (c/handle [::c/restart-not-found (fn [_] :test)]
+      (is (= (c/restart :nonexistent 1)
              :test)))))
 
 (deftest abort-test
   (testing "abort returns a function which explodes when called"
-    (is (thrown? ExceptionInfo
-                 ((c/abort))))))
+    (is (thrown-with-msg? ExceptionInfo #"Abort"
+                 (c/abort)))))
 
 (defspec handle-registers-handlers-only-in-its-context
   100
@@ -69,10 +69,10 @@
   100
   (prop/for-all [id gen/any-equatable
                  value gen/any-equatable]
-    (let [f (c/restart id)
+    (let [f #(c/restart id)
           with-restarts-f (c/with-fn f {id (fn [] value)})]
 
-      (is (thrown-with-msg? ExceptionInfo #"Restart not found" (f)))
+      (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found" (f)))
 
       (c/with [id (fn [] value)]
               (is (= (f) value)))
