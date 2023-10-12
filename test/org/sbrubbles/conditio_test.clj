@@ -15,7 +15,7 @@
                              map (gen/map gen/any gen/any)]
                      (c/condition id map)))
 
-(defspec a-given-condition-doesnt-change-in-condition
+(defspec condition-returns-a-given-condition-unchanged
   100
   (prop/for-all [con gen-condition]
     (is (identical? (c/condition con) con))))
@@ -31,40 +31,38 @@
                (c/condition nil))))
 
 ;; signal
-(deftest signal-test
-  (testing "signal calls the handler it gets if it finds one"
-    (c/handle [:test #(inc (:input %))]
-      (is (= (c/signal :test :input 1) 2))))
+(deftest signal-calls-the-handler
+  (c/handle [:test #(inc (:input %))]
+    (is (= (c/signal :test :input 1) 2))))
 
-  (testing "the default behavior is to explode if given an unknown condition"
-    (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/handler-not-found"
-                          (c/signal :nonexistent :input 1))))
 
-  (testing "signal signals ::c/handler-not-found if it doesn't find the given one"
-    (c/handle [::c/handler-not-found #(::c/id (:condition %))]
-      (is (= (c/signal :nonexistent) :nonexistent)))))
+(deftest signal-explodes-if-given-an-unknown-condition
+  (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/handler-not-found"
+                        (c/signal :nonexistent :input 1))))
+
+(deftest signal-signals-handler-not-found
+  (c/handle [::c/handler-not-found #(::c/id (:condition %))]
+    (is (= (c/signal :nonexistent) :nonexistent))))
 
 ;; restart
-(deftest restart-test
-  (testing "use-restart returns the restart if it finds one"
-    (c/with [:test inc]
-            (is (= (c/restart :test 1)
-                   (inc 1)))))
+(deftest restart-runs-the-given-restart
+  (c/with [:test inc]
+          (is (= (c/restart :test 1)
+                 (inc 1)))))
 
-  (testing "the default behavior is to explode if given an unknown restart"
-    (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found"
-                          (c/restart :nonexistent))))
+(deftest restart-explodes-if-given-an-unknown-restart
+  (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found"
+                        (c/restart :nonexistent))))
 
-  (testing "use-restart signals ::c/restart-not-found if it doesn't find the given restart"
-    (c/handle [::c/restart-not-found (fn [_] :test)]
-      (is (= (c/restart :nonexistent 1)
-             :test)))))
+(deftest restart-signals-restart-not-found
+  (c/handle [::c/restart-not-found (fn [_] :test)]
+    (is (= (c/restart :nonexistent 1)
+           :test))))
 
 ;; abort
-(deftest abort-test
-  (testing "abort returns a function which explodes when called"
-    (is (thrown-with-msg? ExceptionInfo #"Abort"
-                 (c/abort)))))
+(deftest abort-explodes-when-called
+  (is (thrown-with-msg? ExceptionInfo #"Abort"
+                        (c/abort))))
 
 ;; handle
 (defspec handle-registers-handlers-only-in-its-context

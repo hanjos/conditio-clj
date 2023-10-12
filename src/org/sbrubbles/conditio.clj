@@ -45,14 +45,14 @@
       (apply with-bindings* bindings f args))))
 
 (defn signal
-  "Signals a new condition, returning whatever the handler for that condition
+  "Signals a condition, returning whatever the handler for that condition
   returns.
 
   This function itself signals
   :org.sbrubbles.conditio/handler-not-found if a handler couldn't be found."
-  [condition-id & {:as args}]
-  (let [c (condition condition-id args)]
-    (if-let [handler (*handlers* condition-id)]
+  [id & {:as args}]
+  (let [c (condition id args)]
+    (if-let [handler (*handlers* id)]
       (handler c)
       (signal ::handler-not-found :condition c))))
 
