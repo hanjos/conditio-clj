@@ -31,22 +31,22 @@ The end result should look something like this:
   (if (not (= line :fail)) ; :fail represents a malformed log entry
     line
     ; adds :user/use-value and :user/retry-with as available restarts
-    (c/with-restarts [::use-value identity
-                      ::retry-with parse-log-entry] 
-      ; signals :user/malformed-log-entry               
-      (c/signal ::malformed-log-entry line))))
+    (c/with [::use-value identity
+             ::retry-with parse-log-entry]
+            ; signals :user/malformed-log-entry 
+            (c/signal ::malformed-log-entry line))))
 
 (defn parse-log-file []
   ; creates a function which calls parse-log-entry with :user/skip-entry 
   ; available as a restart  
-  (comp (map (c/with-restarts-fn parse-log-entry
-                                 {::skip-entry (fn [] ::skip-entry)}))
+  (comp (map (c/with-fn parse-log-entry
+                        {::skip-entry (fn [] ::skip-entry)}))
         (filter #(not (= % ::skip-entry)))))
 
 (defn analyze-logs [& args]
   ; handles :user/malformed-log-entry conditions, selecting 
   ; :user/skip-entry as the restart to use
-  (c/handle [::malformed-log-entry (c/use-restart ::skip-entry)]
+  (c/handle [::malformed-log-entry (c/restart ::skip-entry)]
     (into []
           (comp cat
                 (parse-log-file))

@@ -24,17 +24,17 @@
 
 (deftest use-restart-test
   (testing "use-restart returns the restart if it finds one"
-    (c/with-restarts [:test inc]
-      (is (= ((c/use-restart :test 1))
-             (inc 1)))))
+    (c/with [:test inc]
+            (is (= ((c/restart :test 1))
+                   (inc 1)))))
 
   (testing "the default behavior is to explode if given an unknown restart"
     (is (thrown-with-msg? ExceptionInfo #"Restart not found"
-                          ((c/use-restart :nonexistent)))))
+                          ((c/restart :nonexistent)))))
 
   (testing "use-restart signals ::c/restart-not-found if it doesn't find the given restart"
     (c/handle [::c/restart-not-found (fn [& _] :test)]
-      (is (= ((c/use-restart :nonexistent 1))
+      (is (= ((c/restart :nonexistent 1))
              :test)))))
 
 (deftest abort-test
@@ -60,8 +60,8 @@
                  value gen/any]
     (is (not (c/*restarts* id)))
 
-    (c/with-restarts [id value]
-      (is (= (c/*restarts* id) value)))
+    (c/with [id value]
+            (is (= (c/*restarts* id) value)))
 
     (is (not (c/*restarts* id)))))
 
@@ -69,13 +69,13 @@
   100
   (prop/for-all [id gen/any-equatable
                  value gen/any-equatable]
-    (let [f (c/use-restart id)
-          with-restarts-f (c/with-restarts-fn f {id (fn [] value)})]
+    (let [f (c/restart id)
+          with-restarts-f (c/with-fn f {id (fn [] value)})]
 
       (is (thrown-with-msg? ExceptionInfo #"Restart not found" (f)))
 
-      (c/with-restarts [id (fn [] value)]
-        (is (= (f) value)))
+      (c/with [id (fn [] value)]
+              (is (= (f) value)))
 
       (is (= (with-restarts-f) value)))))
 
