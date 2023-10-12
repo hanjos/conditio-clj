@@ -11,8 +11,7 @@
 (defn parse-log-entry [line]
   (if (not (= line :fail))
     (str ">>> " line)
-    (c/with [::use-value identity
-             ::retry-with parse-log-entry]
+    (c/with [::retry-with parse-log-entry]
             (c/signal ::malformed-log-entry :line line))))
 
 (defn parse-log-file []
@@ -40,7 +39,7 @@
        [">>> a" ">>> b" ">>> c" ">>> d" ">>> e"]
 
        ; :fail's are replaced with "X", no parsing
-       (select-handler analyze-logs (fn [_] (c/restart ::use-value "X")))
+       (select-handler analyze-logs (fn [_] "X"))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
        [">>> a" ">>> b" ">>> c" "X" "X" "X" ">>> d" "X" ">>> e"]
 

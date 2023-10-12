@@ -33,8 +33,7 @@ The end result should look something like this:
   (if (not (= line :fail)) ; :fail represents a malformed log entry
     line
     ; adds :user/use-value and :user/retry-with as available restarts
-    (c/with [::use-value identity
-             ::retry-with parse-log-entry]
+    (c/with [::retry-with parse-log-entry]
             ; signals :user/malformed-log-entry 
             (c/signal ::malformed-log-entry :line line))))
 

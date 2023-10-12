@@ -46,7 +46,8 @@
 
 (defn signal
   "Signals a condition, returning whatever the handler for that condition
-  returns. The arguments will be used to create the condition to signal.
+  returns. The arguments will be used to create the condition to signal
+  (as in org.sbrubbles.conditio/condition).
 
   This function itself signals
   :org.sbrubbles.conditio/handler-not-found if a handler couldn't be found."
