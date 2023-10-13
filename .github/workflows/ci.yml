@@ -37,9 +37,9 @@ jobs:
           key: cljdeps-${{ hashFiles('deps.edn') }}
           restore-keys: cljdeps-
 
-      - name: Run tests
+      - name: Run tests & coverage
         run: |
-          clojure -X:test
+          clojure -X:env/test:coverage
 
       - name: Lint source
         run: |

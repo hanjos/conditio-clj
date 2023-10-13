@@ -3,17 +3,22 @@
  :deps {}
 
  :aliases
- {:dev
-  {:extra-deps {org.clojure/tools.trace {:mvn/version "0.7.11"}}}
+ {:env/dev {:extra-deps {org.clojure/tools.trace {:mvn/version "0.7.11"}}}
 
-  ;; clojure -X:test
-  ;; clojure -X:test :fail-fast? false
-  :test
-  {:extra-paths ["test"]
-   :extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}
-                org.clojure/test.check {:mvn/version "1.1.1"}}
-   :exec-fn cognitect.test-runner.api/test}
+  :env/test {:extra-paths ["test"]
+             :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
+
+  ;; clojure -X:env/test:runner
+  ;; clojure -X:env/test:runner :fail-fast? false
+  :runner {:extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+           :exec-fn cognitect.test-runner.api/test}
 
   ;; clojure -T:build <fn> <opts>
   :build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.6"}}
-          :ns-default build}}}
+          :ns-default build}
+
+  ;; clojure -X:env/test:coverage
+  :coverage {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
+             :exec-fn     cloverage.coverage/run-project
+             :exec-args   {:src-ns-path  ["src"]
+                           :test-ns-path ["test"]}}}}
