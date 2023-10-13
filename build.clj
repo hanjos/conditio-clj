@@ -1,5 +1,6 @@
 (ns build
-  (:require [clojure.tools.build.api :as b]))
+  (:require
+    [clojure.tools.build.api :as b]))
 
 ; coordinates
 (def lib 'org.sbrubbles/conditio-clj)
@@ -15,6 +16,18 @@
 (def ignore-files [#"user.clj"])
 (def jar-file (format (str dist-dir "/%s-%s.jar") (name lib) version))
 
+; metadata
+(def description "A simple condition system for Clojure, without too much machinery.")
+(def scm-url "https://github.com/hanjos/conditio-clj")
+
+(def pom-template
+  [[:description description]
+   [:url scm-url]
+   [:licenses
+    [:license
+     [:name "MIT License"]
+     [:url (str scm-url "/blob/main/LICENSE")]]]])
+
 (defn- echo [opts & args]
   (when (:verbose opts) (println (apply str args))))
 
@@ -28,18 +41,19 @@
 (defn jar [opts]
   (echo opts "Writing POM...")
   (b/write-pom {:class-dir class-dir
-                :lib lib
-                :version version
-                :basis basis
-                :src-dirs [src-dir]})
+                :lib       lib
+                :version   version
+                :basis     basis
+                :src-dirs  [src-dir]
+                :pom-data  pom-template})
 
   (echo opts "Copying sources...")
-  (b/copy-dir {:src-dirs [src-dir]
+  (b/copy-dir {:src-dirs   [src-dir]
                :target-dir class-dir
-               :ignores ignore-files})
+               :ignores    ignore-files})
 
   (echo opts "Creating the JAR...")
   (b/jar {:class-dir class-dir
-          :jar-file jar-file})
+          :jar-file  jar-file})
 
   opts)
