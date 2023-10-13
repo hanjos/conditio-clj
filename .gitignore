@@ -12,8 +12,9 @@ pom.xml.asc
 .lein-failures
 .nrepl-port
 .cpcache/
-
 .cache
+.lsp
+
 *.iml
 .idea/
 
