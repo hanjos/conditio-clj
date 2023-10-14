@@ -21,4 +21,8 @@
   :coverage {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
              :exec-fn     cloverage.coverage/run-project
              :exec-args   {:src-ns-path  ["src"]
-                           :test-ns-path ["test"]}}}}
+                           :test-ns-path ["test"]}}
+
+  ;; clojure -M:doc
+  :doc {:extra-deps {marginalia/marginalia {:mvn/version "0.9.1"}}
+        :main-opts ["-m" "marginalia.main" "-e" "src/user.clj" "-d" "target/docs" "src/"]}}}

@@ -6,7 +6,8 @@
     [clojure.test.check.properties :as prop]
     [org.sbrubbles.conditio :as c])
   (:import
-    (clojure.lang ExceptionInfo)))
+    (clojure.lang ExceptionInfo)
+    (java.util.regex Pattern)))
 
 ;; conditions
 (def gen-id (gen/such-that #(not (nil? %)) gen/any-equatable))
@@ -69,6 +70,18 @@
 (deftest abort-explodes-when-called
   (is (thrown-with-msg? ExceptionInfo #"Abort"
                         (c/abort))))
+
+(defspec abort-takes-non-string-values
+  100
+  (prop/for-all [v (gen/such-that #(not (nil? %)) gen/any)]
+    ; I would've preferred an (is (thrown-with-msg?)), but it didn't work
+    ; inside a prop/for-all, for some reason
+    (try
+      (c/abort v)
+      (is false)
+      (catch ExceptionInfo e
+        (is (re-find (re-pattern (Pattern/quote (str "Abort on " v)))
+                     (.getMessage e)))))))
 
 ;; handle
 (defspec handle-registers-handlers-only-in-its-context
