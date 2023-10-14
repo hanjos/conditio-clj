@@ -12,14 +12,14 @@
            :exec-fn cognitect.test-runner.api/test
            :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
 
-  ;; clojure -T:build <fn> <opts>
-  :build {:extra-paths ["src"] ; XXX necessary for codox to work!
-          :deps {io.github.clojure/tools.build {:mvn/version "0.9.6"}
-                 codox/codox {:mvn/version "0.10.8"}}
-          :ns-default build}
-
   ;; clojure -X:env/test:coverage
   :coverage {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
              :exec-fn     cloverage.coverage/run-project
              :exec-args   {:src-ns-path  ["src"]
-                           :test-ns-path ["test"]}}}}
+                           :test-ns-path ["test"]}}
+
+  ;; clojure -T:build <fn> <opts>
+  :build {:extra-paths ["src"] ; XXX necessary for codox to work!
+          :deps {io.github.clojure/tools.build {:mvn/version "0.9.6"}
+                 codox/codox {:mvn/version "0.10.8"}}
+          :ns-default build}}}

@@ -66,6 +66,6 @@
                         :source-paths [src-dir]
                         :namespaces ['org.sbrubbles.conditio]
                         :exclude-vars #"^(map)?->\p{Upper}"
-                        :metadata     {}
+                        :metadata     {:doc/format :markdown}
                         :themes       [:default]}))
 
