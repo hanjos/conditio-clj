@@ -3,26 +3,23 @@
  :deps {}
 
  :aliases
- {:env/dev {:extra-deps {org.clojure/tools.trace {:mvn/version "0.7.11"}}}
-
-  :env/test {:extra-paths ["test"]
+ {:env/test {:extra-paths ["test"]
              :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
 
   ;; clojure -X:env/test:runner
   ;; clojure -X:env/test:runner :fail-fast? false
   :runner {:extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
-           :exec-fn cognitect.test-runner.api/test}
+           :exec-fn cognitect.test-runner.api/test
+           :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
 
   ;; clojure -T:build <fn> <opts>
-  :build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.6"}}
+  :build {:extra-paths ["src"] ; XXX necessary for codox to work!
+          :deps {io.github.clojure/tools.build {:mvn/version "0.9.6"}
+                 codox/codox {:mvn/version "0.10.8"}}
           :ns-default build}
 
   ;; clojure -X:env/test:coverage
   :coverage {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
              :exec-fn     cloverage.coverage/run-project
              :exec-args   {:src-ns-path  ["src"]
-                           :test-ns-path ["test"]}}
-
-  ;; clojure -M:doc
-  :doc {:extra-deps {marginalia/marginalia {:mvn/version "0.9.1"}}
-        :main-opts ["-m" "marginalia.main" "-e" "src/user.clj" "-d" "target/docs" "src/"]}}}
+                           :test-ns-path ["test"]}}}}

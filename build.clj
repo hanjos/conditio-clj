@@ -1,6 +1,7 @@
 (ns build
   (:require
-    [clojure.tools.build.api :as b]))
+    [clojure.tools.build.api :as b]
+    [codox.main :as codox]))
 
 ; coordinates
 (def lib 'org.sbrubbles/conditio-clj)
@@ -10,6 +11,7 @@
 (def src-dir "src")
 (def dist-dir "target")
 (def class-dir (str dist-dir "/classes"))
+(def doc-dir (str dist-dir "/doc"))
 (def basis (b/create-basis {:project "deps.edn"}))
 
 ; files
@@ -33,7 +35,6 @@
 
 (defn clean [opts]
   (echo opts "Cleaning " dist-dir "...")
-
   (b/delete {:path dist-dir})
 
   opts)
@@ -57,3 +58,14 @@
           :jar-file  jar-file})
 
   opts)
+
+(defn doc [opts]
+  (echo opts "Generating docs...")
+  (codox/generate-docs {:language     :clojure
+                        :output-path  doc-dir
+                        :source-paths [src-dir]
+                        :namespaces ['org.sbrubbles.conditio]
+                        :exclude-vars #"^(map)?->\p{Upper}"
+                        :metadata     {}
+                        :themes       [:default]}))
+
