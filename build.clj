@@ -4,8 +4,9 @@
     [codox.main :as codox]))
 
 ; coordinates
-(def lib 'org.sbrubbles/conditio-clj)
-(def version "0.1.0")
+(def metadata
+  {:lib 'org.sbrubbles/conditio-clj
+   :version "0.1.0"})
 
 ; directories
 (def src-dir "src")
@@ -16,7 +17,9 @@
 
 ; files
 (def ignore-files [#"user.clj"])
-(def jar-file (format (str dist-dir "/%s-%s.jar") (name lib) version))
+(def jar-file (format (str dist-dir "/%s-%s.jar")
+                      (name (:lib metadata))
+                      (:version metadata)))
 
 ; metadata
 (def description "A simple condition system for Clojure, without too much machinery.")
@@ -30,7 +33,7 @@
      [:name "MIT License"]
      [:url (str scm-url "/blob/main/LICENSE")]]]])
 
-(defn- echo [opts & args]
+(defn- echo [opts & [args]]
   (when (:verbose opts) (println (apply str args))))
 
 (defn clean [opts]
@@ -42,8 +45,8 @@
 (defn jar [opts]
   (echo opts "Writing POM...")
   (b/write-pom {:class-dir class-dir
-                :lib       lib
-                :version   version
+                :lib       (:lib metadata)
+                :version   (:version metadata)
                 :basis     basis
                 :src-dirs  [src-dir]
                 :pom-data  pom-template})
@@ -69,3 +72,7 @@
                         :metadata     {:doc/format :markdown}
                         :themes       [:default]}))
 
+(defn version [opts]
+  (println (:version metadata))
+
+  opts)
