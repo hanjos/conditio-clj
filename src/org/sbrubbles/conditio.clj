@@ -1,5 +1,17 @@
 (ns org.sbrubbles.conditio
-  "A simple condition library.")
+  "A simple condition library.
+
+  Example usage:
+  ```clojure
+  (require '[org.sbrubbles.conditio :as c])
+
+  ;; ...
+
+  (c/handle [:condition #(c/restart :restart (:n %))]
+    (c/with [:restart inc]
+      (assert (= (c/signal :condition :n 1)
+                 2))))
+  ```")
 
 (defn condition?
   "Checks if the given value is a condition: a map with

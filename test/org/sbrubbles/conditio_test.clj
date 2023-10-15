@@ -108,7 +108,7 @@
 
     (is (not (c/*restarts* id)))))
 
-(defspec with-fn-works-just-like-with-restarts
+(defspec with-fn-works-just-like-with
   100
   (prop/for-all [id gen/any-equatable
                  value gen/any-equatable]
@@ -122,5 +122,14 @@
 
       (is (= (with-restarts-f) value)))))
 
+(defspec with-and-handle-together
+  100
+  (prop/for-all [condition-id gen-id
+                 restart-id gen-id
+                 number gen/nat]
+    (c/handle [condition-id #(c/restart restart-id (:n %))]
+      (c/with [restart-id inc]
+        (is (= (c/signal condition-id :n number)
+               (inc number)))))))
 
 
