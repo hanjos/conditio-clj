@@ -30,3 +30,11 @@ jobs:
           VERSION=$(clojure -T:build version)
           mkdir -p publish/docs/$VERSION
           cp -rf target/doc/. publish/docs/$VERSION
+
+      - name: Generate JAR
+        run: |
+          clojure -T:build jar
+
+      - name: Sanity check
+        run: |
+          ls -lR target
