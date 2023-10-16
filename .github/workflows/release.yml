@@ -2,6 +2,10 @@ name: Releasing a new version
 
 on: workflow_dispatch
 
+env:
+  USERNAME: hanjos
+  TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,11 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup JDK 8
-        uses: actions/setup-java@v3
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          java-version: 1.8
+          server-id: github # == project.distributionManagement.repository.id. How to extract it from pom.xml?
+          settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@12.1
@@ -35,6 +40,13 @@ jobs:
         run: |
           clojure -T:build jar
 
-      - name: Sanity check
+      - name: Publish docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ github.token }}
+          publish_dir: ./publish
+          keep_files: true # otherwise the old docs are removed
+
+      - name: Publish JAR to Github Packages
         run: |
-          ls -lR target
+          clojure -T:build deploy
