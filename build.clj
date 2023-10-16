@@ -6,7 +6,13 @@
 ; coordinates
 (def metadata
   {:lib 'org.sbrubbles/conditio-clj
-   :version "0.1.0"})
+   :version "0.1.0"
+   :pom-data [[:description "A simple condition system for Clojure, without too much machinery."]
+              [:url "https://github.com/hanjos/conditio-clj"]
+              [:licenses
+               [:license
+                [:name "MIT License"]
+                [:url "https://github.com/hanjos/conditio-clj/blob/main/LICENSE"]]]]})
 
 ; directories
 (def src-dir "src")
@@ -21,21 +27,11 @@
                       (name (:lib metadata))
                       (:version metadata)))
 
-; metadata
-(def description "A simple condition system for Clojure, without too much machinery.")
-(def scm-url "https://github.com/hanjos/conditio-clj")
-
-(def pom-template
-  [[:description description]
-   [:url scm-url]
-   [:licenses
-    [:license
-     [:name "MIT License"]
-     [:url (str scm-url "/blob/main/LICENSE")]]]])
-
+; helper functions
 (defn- echo [opts & [args]]
   (when (:verbose opts) (println (apply str args))))
 
+; available commands
 (defn clean [opts]
   (echo opts "Cleaning " dist-dir "...")
   (b/delete {:path dist-dir})
@@ -49,7 +45,7 @@
                 :version   (:version metadata)
                 :basis     basis
                 :src-dirs  [src-dir]
-                :pom-data  pom-template})
+                :pom-data  (:pom-data metadata)})
 
   (echo opts "Copying sources...")
   (b/copy-dir {:src-dirs   [src-dir]
@@ -64,7 +60,10 @@
 
 (defn doc [opts]
   (echo opts "Generating docs...")
-  (codox/generate-docs {:language     :clojure
+  (codox/generate-docs {:name "conditio-clj"
+                        :version (:version metadata)
+                        :description (get-in metadata [:pom-data 0 1])
+                        :language     :clojure
                         :output-path  doc-dir
                         :source-paths [src-dir]
                         :namespaces ['org.sbrubbles.conditio]
