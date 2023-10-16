@@ -38,7 +38,7 @@
      (throw (ex-info msg {:args c})))))
 
 (def ^:dynamic *handlers*
-  "The known handlers.
+  "The available handlers.
 
   A handler is a function which takes a condition and returns the value
   `signal` should return. Use `handle` to register new handlers."
@@ -46,7 +46,7 @@
    ::restart-not-found abort})
 
 (def ^:dynamic *restarts*
-  "The known restarts.
+  "The available restarts.
 
   A restart is a function which recovers from conditions, expected to be called
   from a handler. Use `with` to register new restarts."
