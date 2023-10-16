@@ -33,18 +33,10 @@ jobs:
           key: cljdeps-${{ hashFiles('deps.edn') }}
           restore-keys: cljdeps-
 
-  tests:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
       - name: Run tests & coverage
         run: |
           clojure -X:test:coverage
 
-  lint:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
       - name: Lint source
         run: |
           clj-kondo --lint src
