@@ -33,9 +33,11 @@ The end result should look something like this:
   (if (not (= line :fail)) ; :fail represents a malformed log entry
     line
     ; adds :user/retry-with as an available restart
+    ; Common Lisp has a :use-value restart, but since here the handler
+    ; returns the result to use, it didn't seem necessary
     (c/with [::retry-with parse-log-entry]
-            ; signals :user/malformed-log-entry 
-            (c/signal ::malformed-log-entry :line line))))
+      ; signals :user/malformed-log-entry 
+      (c/signal ::malformed-log-entry :line line))))
 
 (defn parse-log-file []
   ; creates a function which calls parse-log-entry with :user/skip-entry 
@@ -62,7 +64,7 @@ The end result should look something like this:
 
 # Using
 
-`deps.edn`. Still gotta figure out how to generate and publish versions, but that shouldn't be too hard...
+`deps.edn`, `tools.build` and [codox](https://github.com/weavejester/codox) for docs. Still gotta figure out how to generate and publish versions, but that shouldn't be too hard...
 
 # Caveats and stuff to mull over
 * Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, but might complicate the implementation.
