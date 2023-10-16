@@ -3,16 +3,16 @@
  :deps {}
 
  :aliases
- {:env/test {:extra-paths ["test"]
-             :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
+ {:test {:extra-paths ["test"]
+         :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
 
-  ;; clojure -X:env/test:runner
-  ;; clojure -X:env/test:runner :fail-fast? false
+  ;; clojure -X:test:runner
+  ;; clojure -X:test:runner :fail-fast? false
   :runner {:extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
            :exec-fn cognitect.test-runner.api/test
            :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
 
-  ;; clojure -X:env/test:coverage
+  ;; clojure -X:test:coverage
   :coverage {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
              :exec-fn     cloverage.coverage/run-project
              :exec-args   {:src-ns-path  ["src"]

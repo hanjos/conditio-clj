@@ -39,7 +39,7 @@ jobs:
 
       - name: Run tests & coverage
         run: |
-          clojure -X:env/test:coverage
+          clojure -X:test:coverage
 
       - name: Lint source
         run: |
