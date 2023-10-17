@@ -1,6 +1,20 @@
 A simple condition system for Clojure, without too much machinery.
 
-[![CI](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml/badge.svg)](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml)
+[![CI](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml/badge.svg)](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml) [![Docs](https://img.shields.io/static/v1?label=Docs&message=0.1.0&color=informational&logo=read-the-docs)][vLatest] [![Maven package](https://img.shields.io/static/v1?label=Maven&message=0.1.0&color=orange&logo=apache-maven)][MavenPackage] [![Git package](https://img.shields.io/static/v1?label=Git&message=0.1.0&color=red&logo=git)][GitPackage]
+
+# Latest release
+
+### Maven 
+```
+org.sbrubbles/conditio-clj {:mvn/version "0.1.0"}
+```                                                                       
+
+### Git
+```
+org.sbrubbles/conditio-clj {:git/url "https://github.com/hanjos/conditio-clj" 
+                            :git/tag "0.1.0"  :git/sha "1be4a0a"}
+```
+
 
 # What 
 
@@ -69,3 +83,8 @@ The end result should look something like this:
 # Caveats and stuff to mull over
 * Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, but might complicate the implementation.
 * I could've used vars instead of keywords. I'm not sure which one works better; so some experiments are in order...
+
+
+[vLatest]: https://sbrubbles.org/conditio-clj/docs/0.1.0/index.html
+[MavenPackage]: https://github.com/hanjos/conditio-clj/packages/1968125
+[GitPackage]: https://github.com/hanjos/conditio-clj/tree/1be4a0a7da7e2026bda32683ef10bbf5bf40bcbe

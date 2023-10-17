@@ -1,14 +1,12 @@
 (ns build
   (:require
-    [cemerick.pomegranate.aether :as aether]
-    [clojure.java.io :as io]
     [clojure.tools.build.api :as b]
     [codox.main :as codox]))
 
 ; coordinates
 (def metadata
   {:lib          'org.sbrubbles/conditio-clj
-   :version      "0.1.0"
+   :version      "0.2.0"
    :dirs         {:src     "src"
                   :target  "target"
                   :classes "target/classes"
@@ -27,6 +25,7 @@
                     [:name "GitHub hanjos Apache Maven Packages"]
                     [:url "https://maven.pkg.github.com/hanjos/conditio-clj"]]]]})
 
+; helper functions
 (def jar-file
   (let [{:keys [lib version dirs]} metadata
         {:keys [target]} dirs]
@@ -34,9 +33,9 @@
             (name lib)
             version)))
 
-; helper functions
 (def flags
-  (into {} ; filtering out nil values
+  ; filtering out nil values
+  (into {}
         (filter second)
         {:verbose (System/getenv "CONDITIO_VERBOSE")}))
 
@@ -44,14 +43,12 @@
   (when (:verbose flags) (println (apply str args))))
 
 ; available commands
-(defn clean [opts]
+(defn clean [_]
   (let [{{:keys [target]} :dirs} metadata]
     (echo "Cleaning " target "...")
-    (b/delete {:path target}))
+    (b/delete {:path target})))
 
-  opts)
-
-(defn jar [opts]
+(defn jar [_]
   (let [{:keys [lib version pom-data basis dirs ignore-files]} metadata
         {:keys [src classes]} dirs]
     (echo "Writing POM...")
@@ -69,11 +66,9 @@
 
     (echo "Creating the JAR...")
     (b/jar {:class-dir classes
-            :jar-file  jar-file}))
+            :jar-file  jar-file})))
 
-  opts)
-
-(defn doc [opts]
+(defn doc [_]
   (let [{:keys [lib version dirs]} metadata
         {:keys [src doc]} dirs
         description (get-in metadata [:pom-data 0 1])]
@@ -87,28 +82,7 @@
                           :namespaces   ['org.sbrubbles.conditio]
                           :exclude-vars #"^(map)?->\p{Upper}"
                           :metadata     {:doc/format :markdown}
-                          :themes       [:default]}))
+                          :themes       [:default]})))
 
-  opts)
-
-(defn deploy [opts]
-  (let [{:keys [lib version dirs]} metadata
-        {:keys [classes]} dirs
-        repo-url (get-in metadata [:pom-data 3 1 3 1])]
-    (echo "Deploying...")
-    (aether/deploy :coordinates [lib version]
-                   :jar-file (io/file jar-file)
-                   :pom-file (io/file (str classes
-                                           "/META-INF/maven/"
-                                           lib
-                                           "/pom.xml"))
-                   :repository {:url      repo-url
-                                :username (System/getenv "USERNAME")
-                                :password (System/getenv "TOKEN")}))
-
-  opts)
-
-(defn version [opts]
-  (println (:version metadata))
-
-  opts)
+(defn version [_]
+  (println (:version metadata)))
