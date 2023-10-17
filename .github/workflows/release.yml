@@ -50,4 +50,4 @@ jobs:
 
       - name: Publish JAR to Github Packages
         run: |
-          clojure -T:build deploy
+          mvn deploy -s $GITHUB_WORKSPACE/settings.xml
