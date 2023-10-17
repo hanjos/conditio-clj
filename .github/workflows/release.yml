@@ -50,4 +50,5 @@ jobs:
 
       - name: Publish JAR to Github Packages
         run: |
+          cp target/classes/META-INF/maven/org.sbrubbles/conditio-clj/pom.xml .
           mvn deploy -s $GITHUB_WORKSPACE/settings.xml
