@@ -49,6 +49,8 @@ jobs:
           keep_files: true # otherwise the old docs are removed
 
       - name: Publish JAR to Github Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cp target/classes/META-INF/maven/org.sbrubbles/conditio-clj/pom.xml .
           mvn deploy -s $GITHUB_WORKSPACE/settings.xml
