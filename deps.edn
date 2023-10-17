@@ -19,8 +19,12 @@
                            :test-ns-path ["test"]}}
 
   ;; clojure -T:build <fn> <opts>
-  :build {:extra-paths ["src"] ; XXX necessary for codox to work!
+  :build {:extra-paths ["src"] ; XXX required for codox
           :deps {io.github.clojure/tools.build {:mvn/version "0.9.6"}
                  codox/codox {:mvn/version "0.10.8"}
                  clj-commons/pomegranate {:mvn/version "1.2.23"}}
-          :ns-default build}}}
+          :ns-default build}}
+
+ ;; XXX required for GitHub Packages
+ :mvn/repos {"github" {:url "https://maven.pkg.github.com/hanjos/conditio-clj"
+                       :snapshots {:enabled false}}}}
