@@ -19,8 +19,8 @@ jobs:
         with:
           java-version: 8
           distribution: temurin
-          server-id: github # == project.distributionManagement.repository.id. How to extract it from pom.xml?
-          settings-path: ${{ github.workspace }} # location for the settings.xml file
+          server-id: github
+          settings-path: ${{ github.workspace }}
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@12.1
