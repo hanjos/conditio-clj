@@ -3,7 +3,7 @@ name: Releasing a new version
 on: workflow_dispatch
 
 env:
-  USERNAME: github
+  USERNAME: ${{ env.GITHUB_ACTOR }}
   TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
