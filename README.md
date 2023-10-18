@@ -2,9 +2,16 @@ A simple condition system for Clojure, without too much machinery.
 
 [![CI](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml/badge.svg)](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml) [![Docs](https://img.shields.io/static/v1?label=Docs&message=0.1.0&color=informational&logo=read-the-docs)][vLatest] [![Maven package](https://img.shields.io/static/v1?label=Maven&message=0.1.0&color=orange&logo=apache-maven)][MavenPackage] [![Git package](https://img.shields.io/static/v1?label=Git&message=0.1.0&color=red&logo=git)][GitPackage]
 
-# Latest release
+# Latest
 
 ### Maven 
+Add this repo to your `deps.edn`:
+```
+:mvn/repos {"github" {:url "https://maven.pkg.github.com/hanjos/conditio-clj"
+                      :snapshots {:enabled false}}}
+```
+
+And then
 ```
 org.sbrubbles/conditio-clj {:mvn/version "0.1.0"}
 ```                                                                       
