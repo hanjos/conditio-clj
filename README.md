@@ -5,7 +5,7 @@ A simple condition system for Clojure, without too much machinery.
 # Latest
 
 ### Maven 
-Add this repo to your `deps.edn`:
+Configure your [`settings.xml`](https://stackoverflow.com/a/58453517), add this repo to your `deps.edn`:
 ```
 :mvn/repos {"github" {:url "https://maven.pkg.github.com/hanjos/conditio-clj"
                       :snapshots {:enabled false}}}
