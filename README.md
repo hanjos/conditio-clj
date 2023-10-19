@@ -24,8 +24,7 @@ Configure your [`settings.xml`](https://stackoverflow.com/a/58453517):
 
 Add this repo to your `deps.edn`:
 ```
-:mvn/repos {"github" {:url "https://maven.pkg.github.com/hanjos/conditio-clj"
-                      :snapshots {:enabled false}}}
+:mvn/repos {"github" {:url "https://maven.pkg.github.com/hanjos/conditio-clj"}}
 ```
 
 And then:
@@ -93,10 +92,10 @@ The end result should look something like this:
 
 # Using
 
-`deps.edn`, `tools.build` and [codox](https://github.com/weavejester/codox) for docs. Still gotta figure out how to generate and publish versions, but that shouldn't be too hard...
+`deps.edn`, `tools.build` and [codox](https://github.com/weavejester/codox) for docs. 
 
 # Caveats and stuff to mull over
-* Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, but might complicate the implementation.
+* Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, though...
 * I could've used vars instead of keywords. I'm not sure which one works better; so some experiments are in order...
 
 
