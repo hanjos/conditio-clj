@@ -42,9 +42,9 @@ A condition system, like the one in Common Lisp, provides a more general solutio
 
 # Why?
 
-I haven't used Clojure in _years_, so this idea seemed as good an excuse as any :smile: 
+I haven't used Clojure in _years_, so this seemed as good an excuse as any :smile: 
 
-It's a good opportunity to remove some cobwebs and check out some "new" stuff, such as `deps.edn`, transducers, maybe `spec` (I said it has been some time...). Let's see how far I go...
+It's an opportunity to remove some cobwebs and check out some "new" stuff, such as `deps.edn`, transducers, maybe `spec` (I said it has been some time...). Let's see how far I go...
 
 # How?
 
@@ -92,7 +92,7 @@ The end result should look something like this:
 
 # Using
 
-`deps.edn`, `tools.build` and [codox](https://github.com/weavejester/codox) for docs. 
+`deps.edn`, `tools.build`, `test.check` and [codox](https://github.com/weavejester/codox) for docs. 
 
 # Caveats and stuff to mull over
 * Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, though...
