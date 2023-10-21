@@ -14,6 +14,8 @@ pom.xml.asc
 .cpcache/
 .cache
 .lsp
+.lock
+inline-configs/
 
 *.iml
 .idea/
