@@ -56,9 +56,7 @@
   "Like `bound-fn*`, but binding the given map along with the thread
    bindings."
   [f map]
-  (let [bindings (merge (get-thread-bindings) map)]
-    (fn [& args]
-      (apply with-bindings* bindings f args))))
+  (with-bindings* map (fn [] (bound-fn* f))))
 
 (defn signal
   "Signals a condition, searching for a handler and returning whatever it
