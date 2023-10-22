@@ -13,6 +13,8 @@
 (v/defrestart *doc-r* "Docs")
 (v/defrestart *map-r* {::key 2})
 
+(defn ^:dynamic *test-restart* [] :success)
+
 ;; tests
 (deftest condition-metadata
   (are [v tag value] (= value (tag (meta v)))
@@ -63,3 +65,33 @@
              (ex-message e)))
       (is (= {:args '("*no-doc-r*" "line")}
              (ex-data e))))))
+
+(deftest restart-resolves-sym-and-runs-them
+  (is (thrown? Exception
+               (v/restart 'nonexistent)))
+
+  (is (= :success (v/restart 'org.sbrubbles.conditio.vars-test/*test-restart*))))
+
+(deftest with-fn-adds-restarts
+  (let [f (fn [] (v/restart 'org.sbrubbles.conditio.vars-test/*no-doc-r*))
+        bound-f (v/with-fn {#'*no-doc-r* (fn [] :success)}
+                           f)]
+    (is (thrown-with-msg? ExceptionInfo #"\*restart-not-found\*"
+                          (f)))
+
+    (binding [*no-doc-r* (fn [] :success)]
+      (is (= :success (f))))
+
+    (is (= :success (bound-f)))))
+
+(deftest with-adds-restarts-too
+  (let [f (fn [] (v/restart 'org.sbrubbles.conditio.vars-test/*no-doc-r*))
+        bound-f (v/with [*no-doc-r* (fn [] :success)]
+                        f)]
+    (is (thrown-with-msg? ExceptionInfo #"\*restart-not-found\*"
+                          (f)))
+
+    (binding [*no-doc-r* (fn [] :success)]
+      (is (= :success (f))))
+
+    (is (= :success (bound-f)))))
