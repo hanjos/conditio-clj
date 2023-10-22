@@ -66,15 +66,9 @@
       (is (= {:args '("*no-doc-r*" "line")}
              (ex-data e))))))
 
-(deftest restart-resolves-sym-and-runs-them
-  (is (thrown? Exception
-               (v/restart 'nonexistent)))
-
-  (is (= :success (v/restart 'org.sbrubbles.conditio.vars-test/*test-restart*))))
-
-(deftest with-fn-adds-restarts
-  (let [f (fn [] (v/restart 'org.sbrubbles.conditio.vars-test/*no-doc-r*))
-        bound-f (v/with-fn {#'*no-doc-r* (fn [] :success)}
+(deftest bind-fn-adds-restarts
+  (let [f (fn [] (*no-doc-r*))
+        bound-f (v/bind-fn {#'*no-doc-r* (fn [] :success)}
                            f)]
     (is (thrown-with-msg? ExceptionInfo #"\*restart-not-found\*"
                           (f)))

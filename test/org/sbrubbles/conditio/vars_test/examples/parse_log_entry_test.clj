@@ -15,7 +15,7 @@
     (*malformed-log-entry* line)))
 
 (defn parse-log-file []
-  (comp (map (v/with-fn {#'*skip-entry* (fn [& _] ::skip-entry)}
+  (comp (map (v/bind-fn {#'*skip-entry* (fn [& _] ::skip-entry)}
                         parse-log-entry))
         (filter #(not= % ::skip-entry))))
 

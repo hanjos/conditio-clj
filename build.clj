@@ -79,7 +79,7 @@
                           :language     :clojure
                           :output-path  doc
                           :source-paths [src]
-                          :namespaces   ['org.sbrubbles.conditio]
+                          :namespaces   ['org.sbrubbles.conditio 'org.sbrubbles.conditio.vars]
                           :exclude-vars #"^(map)?->\p{Upper}"
                           :metadata     {:doc/format :markdown}
                           :themes       [:default]})))

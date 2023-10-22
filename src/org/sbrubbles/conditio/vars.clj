@@ -1,6 +1,5 @@
 (ns org.sbrubbles.conditio.vars
-  "A variation on org.sbrubbles.conditio, using vars instead of keywords.
-  That led to something quite different...
+  "A variation on `org.sbrubbles.conditio`, using vars instead of keywords.
 
   Example usage:
   ```clojure
@@ -9,8 +8,7 @@
   (v/defcondition *cc*)
   (v/defrestart *rr*)
 
-  (binding [*cc* (fn [& args] (v/restart '*rr* (first args)))]
-    ; ...
+  (binding [*cc* (fn [& args] (*rr* (first args)))]
     (binding [*rr* inc]
       (assert (= (*cc* 1) 2))))
   ```
@@ -22,14 +20,13 @@
         :else {:args maybe-map}))
 
 (defmacro defcondition
-  "Creates a new var holding a signalling function. When called, it will
+  "Creates a new var holding a signalling function, which, when called, will
   throw an `ExceptionInfo`. The idea is for this var to be re-bound (via
-  `binding`) to a handler."
+  `binding`) to a function which will handle the condition."
   ([name] `(defcondition ~name nil))
   ([name meta-map]
    (let [meta (merge (->meta-map meta-map)
                      {:dynamic true})]
-     ;; normal ^:dynamic syntax doesn't work inside macros
      `(def ~(with-meta name meta)
         (fn [& args#]
           (throw (ex-info ~(pr-str name) {:args args#})))))))
@@ -38,9 +35,9 @@
               "Signalled when a given restart isn't found.")
 
 (defmacro defrestart
-  "Creates a new var holding a restart function, which when called will signal
-  `*restart-not-found*`. The idea is for this var to become a target for
-  `restart` and `with`."
+  "Creates a new var holding a restart function, which, when called, will
+  signal `*restart-not-found*`. The idea is for this var to be re-bound (via
+  `binding`) to a function, which will generate the end result."
   ([name] `(defrestart ~name nil))
   ([name meta-map]
    (let [meta (merge (->meta-map meta-map)
@@ -49,15 +46,8 @@
         (fn [& args#]
           (apply *restart-not-found* (conj args# ~(pr-str name))))))))
 
-(defn restart
-  "Resolves `sym` to a var expected to hold a function and runs it, with
-  `args`. `sym` should be namespaced."
-  [sym & args]
-  (if-let [v (resolve sym)]
-    (apply (var-get v) args)
-    (*restart-not-found* sym args)))
-
-(defn with-fn
-  "Returns a function which, when run, will see the bindings in `binding-map`."
+(defn bind-fn
+  "Returns a function which will install the bindings in `binding-map`
+  and then call `f` with the given argument."
   [binding-map f]
   (with-bindings* binding-map (fn [] (bound-fn* f))))
