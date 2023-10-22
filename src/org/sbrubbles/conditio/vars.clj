@@ -24,9 +24,7 @@
                      {:dynamic true})]
      `(def ~(with-meta name meta)
         (fn [& args#]
-          (if-let [v# (resolve '~name)]
-            (apply (var-get v#) args#)
-            (*restart-not-found* ~name args#)))))))
+          (apply *restart-not-found* (conj args# ~(pr-str name))))))))
 
 (defn restart [sym & args]
   (if-let [v (resolve sym)]
