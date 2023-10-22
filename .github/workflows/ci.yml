@@ -13,6 +13,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 1.8
+          distribution: temurin
           server-id: github # == project.distributionManagement.repository.id. How to extract it from pom.xml?
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
