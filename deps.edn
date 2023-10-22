@@ -8,8 +8,10 @@
 
   ;; clojure -X:test:runner
   ;; clojure -X:test:runner :fail-fast? false
-  :runner   {:extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
-             :exec-fn    cognitect.test-runner.api/test
+  :runner   {:extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}
+             :exec-fn    kaocha.runner/exec-fn
+             :exec-args  {:kaocha/reporter [kaocha.report/documentation]
+                          :kaocha/plugins  [:kaocha.plugin/profiling]}
              :jvm-opts   ["-XX:-OmitStackTraceInFastThrow"]}
 
   ;; clojure -X:test:coverage
@@ -26,7 +28,7 @@
              :ns-default  build}
 
   ;; clojure -M:build:test:repl
-  :repl     {:extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}
+  :repl     {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
                           cider/cider-nrepl {:mvn/version "0.40.0"}}
              :main-opts  ["-m" "nrepl.cmdline"
                           "--color" "--interactive"
