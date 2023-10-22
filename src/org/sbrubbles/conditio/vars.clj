@@ -6,6 +6,7 @@
         :else {:args maybe-map}))
 
 (defmacro defcondition
+  "doc"
   ([name] `(defcondition ~name nil))
   ([name meta-map]
    (let [meta (merge (->meta-map meta-map)
@@ -18,6 +19,7 @@
 (defcondition *restart-not-found*)
 
 (defmacro defrestart
+  "doc"
   ([name] `(defrestart ~name nil))
   ([name meta-map]
    (let [meta (merge (->meta-map meta-map)
@@ -26,12 +28,15 @@
         (fn [& args#]
           (apply *restart-not-found* (conj args# ~(pr-str name))))))))
 
-(defn restart [sym & args]
+(defn restart
+  "doc"
+  [sym & args]
   (if-let [v (resolve sym)]
     (apply (var-get v) args)
     (*restart-not-found* sym args)))
 
 (defmacro with
+  "doc"
   [bindings f]
   (let [var-ize (fn [var-vals]
                   (loop [ret [] vvs (seq var-vals)]
@@ -41,5 +46,7 @@
                       (seq ret))))]
     `(with-fn (hash-map ~@(var-ize bindings)) ~f)))
 
-(defn with-fn [map f]
+(defn with-fn
+  "doc"
+  [map f]
   (with-bindings* map (fn [] (bound-fn* f))))
