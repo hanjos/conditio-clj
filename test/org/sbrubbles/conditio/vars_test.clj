@@ -83,15 +83,3 @@
       (is (= :success (f))))
 
     (is (= :success (bound-f)))))
-
-(deftest with-adds-restarts-too
-  (let [f (fn [] (v/restart 'org.sbrubbles.conditio.vars-test/*no-doc-r*))
-        bound-f (v/with [*no-doc-r* (fn [] :success)]
-                        f)]
-    (is (thrown-with-msg? ExceptionInfo #"\*restart-not-found\*"
-                          (f)))
-
-    (binding [*no-doc-r* (fn [] :success)]
-      (is (= :success (f))))
-
-    (is (= :success (bound-f)))))

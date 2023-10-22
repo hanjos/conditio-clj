@@ -1,4 +1,20 @@
-(ns org.sbrubbles.conditio.vars)
+(ns org.sbrubbles.conditio.vars
+  "A variation on org.sbrubbles.conditio, using vars instead of keywords.
+  That led to something quite different...
+
+  Example usage:
+  ```clojure
+  (require '[org.sbrubbles.conditio.vars :as v])
+
+  (v/defcondition *cc*)
+  (v/defrestart *rr*)
+
+  (binding [*cc* (fn [& args] (v/restart '*rr* (first args)))]
+    ; ...
+    (binding [*rr* inc]
+      (assert (= (*cc* 1) 2))))
+  ```
+  ")
 
 (defn- ->meta-map [maybe-map]
   (cond (string? maybe-map) {:doc maybe-map}
@@ -40,18 +56,6 @@
   (if-let [v (resolve sym)]
     (apply (var-get v) args)
     (*restart-not-found* sym args)))
-
-(defmacro with
-  "A macro which transforms `bindings` in a map (much like `binding`) and
-  gives that map and `f` to `with-fn`."
-  [bindings f]
-  (let [var-ize (fn [var-vals]
-                  (loop [ret [] vvs (seq var-vals)]
-                    (if vvs
-                      (recur (conj (conj ret `(var ~(first vvs))) (second vvs))
-                             (next (next vvs)))
-                      (seq ret))))]
-    `(with-fn (hash-map ~@(var-ize bindings)) ~f)))
 
 (defn with-fn
   "Returns a function which, when run, will see the bindings in `binding-map`."
