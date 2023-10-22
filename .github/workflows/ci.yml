@@ -36,7 +36,7 @@ jobs:
 
       - name: Run tests & coverage
         run: |
-          clojure -X:test:coverage
+          clojure -X:test:runner
 
       - name: Lint source
         run: |
