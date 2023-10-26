@@ -103,7 +103,7 @@
     (is (not (c/*restarts* id)))
 
     (let [f #(c/restart id)
-          with-restarts-f (c/with-fn f {id (fn [] value)})]
+          with-restarts-f (c/with-fn {id (fn [] value)} f)]
       (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found" (f)))
 
       (c/with [id (fn [] value)]

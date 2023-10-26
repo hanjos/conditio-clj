@@ -52,11 +52,11 @@
   from a handler. Use `with` to register new restarts."
   {})
 
-(defn- bind-fn-with*
-  "Like `bound-fn*`, but binding the given map along with the thread
-   bindings."
-  [f map]
-  (with-bindings* map (fn [] (bound-fn* f))))
+(defn- bind-fn
+ "Returns a function, which will install the bindings in `binding-map`
+  and then call `f` with the given arguments."
+ [binding-map f]
+ (with-bindings* binding-map (fn [] (bound-fn* f))))
 
 (defn signal
   "Signals a condition, searching for a handler and returning whatever it
@@ -74,8 +74,8 @@
   "Returns a function, which will install the given restarts and then run `f`.
   This may be used to define a helper function which runs on a different
   thread, but needs the given restarts in place."
-  [f restart-map]
-  (bind-fn-with* f {#'*restarts* (merge *restarts* restart-map)}))
+  [restart-map f]
+  (bind-fn {#'*restarts* (merge *restarts* restart-map)} f))
 
 (defmacro with
   "Takes a map of keyword/restart pairs, and then:

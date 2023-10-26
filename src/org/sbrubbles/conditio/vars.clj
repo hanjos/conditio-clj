@@ -47,7 +47,7 @@
           (apply *restart-not-found* (conj args# ~(pr-str name))))))))
 
 (defn bind-fn
-  "Returns a function which will install the bindings in `binding-map`
+  "Returns a function, which will install the bindings in `binding-map`
   and then call `f` with the given arguments."
   [binding-map f]
   (with-bindings* binding-map (fn [] (bound-fn* f))))
