@@ -17,7 +17,7 @@
   "Checks if the given value is a condition: a map with
   `:org.sbrubbles.conditio/id` mapped to a non-`nil` value."
   [v]
-  (and (map? v) (contains? v ::id)))
+  (and (map? v) (some? (::id v))))
 
 (defn condition
   "Creates a new condition, or returns it unchanged if it's the sole argument."
