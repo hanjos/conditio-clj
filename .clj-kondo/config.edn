@@ -1,12 +1,12 @@
-{:linters {:refer-all {:exclude [clojure.test]}
-           :unresolved-symbol {:exclude [(org.sbrubbles.conditio.vars/defcondition)
-                                         (org.sbrubbles.conditio.vars/defrestart)]}
+{:linters {:refer-all                 {:exclude [clojure.test]}
+           :unresolved-symbol         {:exclude [(org.sbrubbles.conditio.vars/defcondition)
+                                                 (org.sbrubbles.conditio.vars/defrestart)]}
            :earmuffed-var-not-dynamic {:exclude [org.sbrubbles.conditio.vars]}
-           :missing-docstring {:level :warning}}
+           :missing-docstring         {:level :warning}}
 
- :lint-as {clojure.test.check.clojure-test/defspec clojure.core/def
+ :lint-as {clojure.test.check.clojure-test/defspec  clojure.core/def
            org.sbrubbles.conditio.vars/defcondition clj-kondo.lint-as/def-catch-all
-           org.sbrubbles.conditio.vars/defrestart clj-kondo.lint-as/def-catch-all}
+           org.sbrubbles.conditio.vars/defrestart   clj-kondo.lint-as/def-catch-all}
 
- :output {:exclude-files ["README.md" "src/user.clj"]}}
+ :output  {:exclude-files ["README.md" "src/user.clj" "build.clj" "test"]}}
 

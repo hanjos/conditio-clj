@@ -6,7 +6,7 @@
 ; coordinates
 (def metadata
   {:lib          'org.sbrubbles/conditio-clj
-   :version      "0.2.0"
+   :version      "0.2.0-SNAPSHOT"
    :dirs         {:src     "src"
                   :target  "target"
                   :classes "target/classes"
