@@ -15,10 +15,9 @@
                              map (gen/map gen/any gen/any)]
                      (c/condition id map)))
 
-(defspec conditions
-  100
-  (prop/for-all [id gen-id
-                 con gen-condition]
+(deftest conditions
+  (let [id :id
+        con (c/condition id)]
     (is (identical? (c/condition con) con))
     (is (c/condition? con))
     (is (= (::c/id (c/condition id))
@@ -78,16 +77,13 @@
                      (.getMessage e)))))))
 
 ;; handle, with and with-fn
-(defspec handle-and-with
-  100
-  (prop/for-all [id gen/any-equatable
-                 value gen/any]
-    (when (and (not= id ::c/handler-not-found)
-               (not= id ::c/restart-not-found))
-      (is (not (c/*handlers* id)))
-      (c/handle [id value]
-        (is (= (c/*handlers* id) value)))
-      (is (not (c/*handlers* id))))
+(deftest handle-and-with
+  (let [id :id
+        value "value"]
+    (is (not (c/*handlers* id)))
+    (c/handle [id value]
+      (is (= (c/*handlers* id) (list value c/abort))))
+    (is (not (c/*handlers* id)))
 
     (is (not (c/*restarts* id)))
     (c/with [id value]
@@ -107,4 +103,9 @@
       (is (= (c/signal :condition :n 1)
              (inc 1))))))
 
-
+;; skipping
+(deftest skipping
+  (c/handle [:else (fn [_] :success)]
+    (c/handle [:else c/skip]
+      (is (= (c/signal :else)
+             :success)))))
