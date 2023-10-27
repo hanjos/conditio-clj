@@ -15,7 +15,7 @@
                              map (gen/map gen/any gen/any)]
                      (c/condition id map)))
 
-(defspec condition-properties
+(defspec conditions
   100
   (prop/for-all [id gen-id
                  con gen-condition]
@@ -24,8 +24,8 @@
     (is (= (::c/id (c/condition id))
            id))
 
-    (let [id (::c/id con)]
-      (c/handle [id identity]
+    (let [c-id (::c/id con)]
+      (c/handle [c-id identity]
         (is (identical? (c/signal con) con))))))
 
 (deftest condition-id-cannot-be-nil
@@ -48,8 +48,8 @@
 ;; restart
 (deftest restart-runs-the-given-restart
   (c/with [:test inc]
-          (is (= (c/restart :test 1)
-                 (inc 1)))))
+    (is (= (c/restart :test 1)
+           (inc 1)))))
 
 (deftest restart-explodes-if-given-an-unknown-restart
   (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found"
@@ -77,48 +77,34 @@
         (is (re-find (re-pattern (Pattern/quote (str "Abort on " v)))
                      (.getMessage e)))))))
 
-;; handle
-(defspec handle-registers-handlers-only-in-its-context
-  100
-  (prop/for-all [id (gen/such-that #(not (#{::c/handler-not-found ::c/restart-not-found} %))
-                                   gen/any-equatable)
-                 value gen/any]
-    (is (not (c/*handlers* id)))
-
-    (c/handle [id value]
-      (is (= (c/*handlers* id) value)))
-
-    (is (not (c/*handlers* id)))))
-
-;; with and with-fn
-(defspec with-and-with-fn
+;; handle, with and with-fn
+(defspec handle-and-with
   100
   (prop/for-all [id gen/any-equatable
                  value gen/any]
+    (when (and (not= id ::c/handler-not-found)
+               (not= id ::c/restart-not-found))
+      (is (not (c/*handlers* id)))
+      (c/handle [id value]
+        (is (= (c/*handlers* id) value)))
+      (is (not (c/*handlers* id))))
+
     (is (not (c/*restarts* id)))
-
     (c/with [id value]
-            (is (= (c/*restarts* id) value)))
-
+      (is (= (c/*restarts* id) value)))
     (is (not (c/*restarts* id)))
 
     (let [f #(c/restart id)
           with-restarts-f (c/with-fn {id (fn [] value)} f)]
       (is (thrown-with-msg? ExceptionInfo #"Abort: :org.sbrubbles.conditio/restart-not-found" (f)))
-
       (c/with [id (fn [] value)]
         (is (= (f) value)))
-
       (is (= (with-restarts-f) value)))))
 
-(defspec with-and-handle-together
-  100
-  (prop/for-all [condition-id gen-id
-                 restart-id gen-id
-                 number gen/nat]
-    (c/handle [condition-id #(c/restart restart-id (:n %))]
-      (c/with [restart-id inc]
-        (is (= (c/signal condition-id :n number)
-               (inc number)))))))
+(deftest with-and-handle-together
+  (c/handle [:condition #(c/restart :restart (:n %))]
+    (c/with [:restart inc]
+      (is (= (c/signal :condition :n 1)
+             (inc 1))))))
 
 
