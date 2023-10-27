@@ -37,28 +37,32 @@
                    :else (str "Abort on " c))]
      (throw (ex-info msg {:args c})))))
 
+(def ^:private SKIP (gensym))
+
 (defn skip
   "Returns a value which, when returned by a handler, means that it opted not
   to handle the condition, and the handler chain should try another handler.
 
   The 1-arity version is there to work as a handler, and returns the same
   value."
-  ([] ::skip)
-  ([_] ::skip))
+  ([] SKIP)
+  ([_] SKIP))
 
 (def ^:dynamic *handlers*
-  "The available handlers.
+  "The available handlers, stored as handler chains. Use `handle` to register
+  new handlers.
 
   A handler is a function which takes a condition and returns the value
-  `signal` should return. Use `handle` to register new handlers."
+  `signal` should return. A handler chain is a sequence of handlers, to be
+  run one at a time until the first non-`(skip)` value is returned."
   {::handler-not-found (list abort)
    ::restart-not-found (list abort)})
 
 (def ^:dynamic *restarts*
-  "The available restarts.
+  "The available restarts. Use `with` to register new restarts.
 
   A restart is a function which recovers from conditions, expected to be called
-  from a handler. Use `with` to register new restarts."
+  from a handler."
   {})
 
 (defn- bind-fn
@@ -67,7 +71,7 @@
   [binding-map f]
   (with-bindings* binding-map (fn [] (bound-fn* f))))
 
-(defn seek
+(defn- seek
   "Takes a transducer (`xf`) and a coll (`coll`), returning the first element
   in coll which makes it past `xf`, suitably transformed and filtered."
   [xf coll]
@@ -76,7 +80,7 @@
              nil
              coll))
 
-(defn ->handler
+(defn- ->handler
   "Returns a handler equivalent to the given handler chain, or `nil` if the
   given chain is nil.
 
@@ -86,22 +90,9 @@
   (when chain
     (fn [c]
       (seek (comp (map #(% c))
-                  (drop-while #(= % ::skip))
+                  (drop-while #(= % SKIP))
                   (take 1))
             chain))))
-
-(defn merge-handlers
-  "Expects a map of handler chains (like `*handlers*`) and a map of
-  keyword/handler pairs, and returns a map of handler chains, with the
-  bindings conj-ed in."
-  [chain-map bindings]
-  (reduce-kv (fn [acc k v]
-               (println acc k v)
-               (if (contains? acc k)
-                 (assoc acc k (conj (get acc k) v))
-                 (assoc acc k (list v abort))))
-             chain-map
-             bindings))
 
 (defn signal
   "Signals a condition, searching for a handler and returning whatever it
@@ -151,5 +142,13 @@
   3. pops the given handlers after body was evaluated; and
   4. returns the value of body."
   [bindings & body]
-  `(binding [*handlers* (merge-handlers *handlers* (hash-map ~@bindings))]
-     ~@body))
+  `(let [merge-handlers# (fn [chain-map# bindings#]
+                          (reduce-kv (fn [acc# k# v#]
+                                       (println acc# k# v#)
+                                       (if (contains? acc# k#)
+                                         (assoc acc# k# (conj (get acc# k#) v#))
+                                         (assoc acc# k# (list v# abort))))
+                                     chain-map#
+                                     bindings#))]
+     (binding [*handlers* (merge-handlers# *handlers* (hash-map ~@bindings))]
+       ~@body)))

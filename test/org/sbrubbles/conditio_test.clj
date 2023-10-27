@@ -109,3 +109,7 @@
     (c/handle [:else c/skip]
       (is (= (c/signal :else)
              :success)))))
+
+(deftest skip-0-and-1-return-the-same
+  (is (= (c/skip)
+         (c/skip :doesnt-matter))))
