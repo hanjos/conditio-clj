@@ -6,13 +6,13 @@
 
 `org.sbrubbles.conditio` uses keywords as identifiers for conditions and restarts, whereas `org.sbrubbles.conditio.vars` uses vars. The end API is quite different...
 
-Using keywords:
-* Requires building up some machinery, but I feel it's easier to understand and inspect; the data (conditions, available handlers and restarts) are explicit.
+Keywords:
+* Require building up some machinery, but I feel it's easier to understand and inspect; the data (conditions, available handlers and restarts) are explicit.
 
-Using vars:
-* It's a very thin layer over Clojure's preexisting functionality; just a couple of helper macros (and function). That minimalism is very appealing, but it's almost to the point that I question the need of a library at all...
-* The concepts seem... complected, maybe? For example, condition and signal are blurred together in defcondition, which effectively creates a specialized signal function for that condition.
+Vars:
+* Offer a very thin layer over Clojure's preexisting functionality. To the point that I question the need of a library at all...
+* Seem to... complect the concepts, maybe? For example, `defcondition`  effectively creates a specialized signal function for every condition.
 
-Strictly speaking, both approaches are very simplistic; none have a notion of skipping, for example. Maybe adding more features would help distinguish them...
+Maybe adding more features would help to distinguish them. Skipping, for example, was implemented in keywords while preserving (most of) the API. I haven't figured to how do it in vars yet; at least not without extra functions... 
 
 
