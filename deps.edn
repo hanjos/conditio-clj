@@ -3,8 +3,7 @@
  :deps      {}
 
  :aliases
- {:test     {:extra-paths ["test"]
-             :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}}}
+ {:test     {:extra-paths ["test"]}
 
   ;; clojure -X:test:runner
   ;; clojure -X:test:runner :fail-fast? false

@@ -1,20 +1,11 @@
 (ns org.sbrubbles.conditio-test
   (:require
     [clojure.test :refer :all]
-    [clojure.test.check.clojure-test :refer [defspec]]
-    [clojure.test.check.generators :as gen]
-    [clojure.test.check.properties :as prop]
     [org.sbrubbles.conditio :as c])
   (:import
-    (clojure.lang ExceptionInfo)
-    (java.util.regex Pattern)))
+    (clojure.lang ExceptionInfo)))
 
 ;; conditions
-(def gen-id (gen/such-that #(some? %) gen/any-equatable))
-(def gen-condition (gen/let [id gen-id
-                             map (gen/map gen/any gen/any)]
-                     (c/condition id map)))
-
 (deftest conditions
   (let [id :id
         con (c/condition id)]
@@ -62,19 +53,16 @@
 ;; abort
 (deftest abort-explodes-when-called
   (is (thrown-with-msg? ExceptionInfo #"Abort"
-                        (c/abort))))
+                        (c/abort)))
 
-(defspec abort-takes-non-string-values
-  100
-  (prop/for-all [v (gen/such-that #(not (nil? %)) gen/any)]
-    ; I would've preferred an (is (thrown-with-msg?)), but it didn't work
-    ; inside a prop/for-all, for some reason
-    (try
-      (c/abort v)
-      (is false)
-      (catch ExceptionInfo e
-        (is (re-find (re-pattern (Pattern/quote (str "Abort on " v)))
-                     (.getMessage e)))))))
+  (is (thrown-with-msg? ExceptionInfo #"Abort on "
+                        (c/abort 1)))
+
+  (is (thrown-with-msg? ExceptionInfo #"Abort on "
+                        (c/abort :args)))
+
+  (is (thrown-with-msg? ExceptionInfo #"Abort on "
+                        (c/abort {}))))
 
 ;; handle, with and with-fn
 (deftest handle-and-with
