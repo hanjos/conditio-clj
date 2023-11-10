@@ -95,8 +95,10 @@ The end result should look something like this:
 `deps.edn`, `tools.build` and [codox](https://github.com/weavejester/codox) for docs. 
 
 # Caveats and stuff to mull over
-* Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, though...
-* I could've used vars instead of keywords. I'm not sure which one works better; so [some experiments](DESIGN.md) are in order...
+* Despite what the name might suggest, I didn't try to maintain parity with
+ [conditio-java](https://github.com/hanjos/conditio-java), although almost everything is there.
+* I could've used vars instead of keywords. I'm not sure which one works 
+better; so [some experiments](DESIGN.md) are in order...
 
 
 [vLatest]: https://sbrubbles.org/conditio-clj/docs/0.1.0/index.html
