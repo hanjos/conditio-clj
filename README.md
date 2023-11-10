@@ -92,7 +92,7 @@ The end result should look something like this:
 
 # Using
 
-`deps.edn`, `tools.build`, `test.check` and [codox](https://github.com/weavejester/codox) for docs. 
+`deps.edn`, `tools.build` and [codox](https://github.com/weavejester/codox) for docs. 
 
 # Caveats and stuff to mull over
 * Despite what the name might suggest, I didn't try to maintain parity with [conditio-java](https://github.com/hanjos/conditio-java). Particularly, there's no skipping handlers here. Sounds interesting to have, though...
