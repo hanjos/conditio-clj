@@ -25,14 +25,13 @@
   ([c] (condition c nil))
   ([id & {:as args}]
    (assert (not (nil? id)))
-   (if (nil? args)
-     (if (condition? id)
-       id
-       {::id id})
-     (assoc args ::id id))))
+   (cond (not (nil? args)) (assoc args ::id id)
+         (condition? id) id
+         :else {::id id})))
 
 (defn abort
-  "Throws an exception, taking an optional argument. Also works as a handler."
+  "Throws an exception, taking an optional argument. The 1-arity version
+  works as a handler."
   ([] (abort nil))
   ([c]
    (let [msg (cond (nil? c) "Abort"
@@ -56,7 +55,7 @@
   new handlers.
 
   A handler is a function which takes a condition and returns the value
-  `signal` should return. A handler chain is a sequence of handlers, to be
+  `signal` should return. A handler chain is a list of handlers, to be
   run one at a time until the first non-`(skip)` value is returned."
   {::handler-not-found (list abort)
    ::restart-not-found (list abort)})
@@ -139,10 +138,9 @@
   [bindings & body]
   `(let [merge-handlers# (fn [chain-map# bindings#]
                            (reduce-kv (fn [acc# k# v#]
-                                        (println acc# k# v#)
-                                        (if (contains? acc# k#)
-                                          (assoc acc# k# (conj (get acc# k#) v#))
-                                          (assoc acc# k# (list v# abort))))
+                                        (assoc acc# k# (if (contains? acc# k#)
+                                                         (conj (get acc# k#) v#)
+                                                         (list v# abort))))
                                       chain-map#
                                       bindings#))]
      (binding [*handlers* (merge-handlers# *handlers* (hash-map ~@bindings))]
