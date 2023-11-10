@@ -96,7 +96,13 @@
   (c/handle [:else (fn [_] :success)]
     (c/handle [:else c/skip]
       (is (= (c/signal :else)
-             :success)))))
+             :success))))
+
+  (c/handle [:else (fn [_] 2)]
+    (c/handle [:else (fn [_] 1)]
+      (c/handle [:else c/skip]
+        (is (= (c/signal :else)
+               1))))))
 
 (deftest skip-0-and-1-return-the-same
   (is (= (c/skip)
