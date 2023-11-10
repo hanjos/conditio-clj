@@ -20,12 +20,15 @@
   (and (map? v) (some? (::id v))))
 
 (defn condition
-  "Creates a new condition, or returns it unchanged if it's the sole argument."
+  "Creates a new condition, or returns it unchanged if it's the sole argument.
+  `id` cannot be nil."
   ([c] (condition c nil))
   ([id & {:as args}]
    (assert (not (nil? id)))
    (if (nil? args)
-     (if (condition? id) id {::id id})
+     (if (condition? id)
+       id
+       {::id id})
      (assoc args ::id id))))
 
 (defn abort
@@ -71,39 +74,31 @@
   [binding-map f]
   (with-bindings* binding-map (fn [] (bound-fn* f))))
 
-(defn- seek
-  "Takes a transducer (`xf`) and a coll (`coll`), returning the first element
-  in coll which makes it past `xf`, suitably transformed and filtered."
-  [xf coll]
-  (transduce xf
-             (completing (fn [_ x] (reduced x)))
-             nil
-             coll))
-
-(defn- ->handler
-  "Returns a handler equivalent to the given handler chain, or `nil` if the
-  given chain is nil.
+(defn- chain-handle
+  "Attempts to handle the condition (`c`) with the given handler chain
+  (`chain`).
 
   A handler chain is a sequence of handlers, to be run one at a time until
   the first non-`(skip)` value is returned."
-  [chain]
-  (when chain
-    (fn [c]
-      (seek (comp (map #(% c))
-                  (drop-while #(= % SKIP))
-                  (take 1))
-            chain))))
+  [chain c]
+  (transduce (comp (map #(% c))
+                   (drop-while #(= % SKIP))
+                   (take 1))
+             (completing (fn [_ x] (reduced x)))
+             nil
+             chain))
 
 (defn signal
   "Signals a condition, searching for a handler and returning whatever it
-  returns. `id` and `args` will be used to create the condition.
+  returns. `id` and `args` will be used to create the condition, as in
+  `condition`.
 
   Signals `:org.sbrubbles.conditio/handler-not-found` if a handler couldn't
   be found."
   [id & {:as args}]
   (let [c (condition id args)]
-    (if-let [handler (->handler (get *handlers* (::id c)))]
-      (handler c)
+    (if-let [chain (get *handlers* (::id c))]
+      (chain-handle chain c)
       (signal ::handler-not-found :condition c))))
 
 (defn with-fn
@@ -143,12 +138,12 @@
   4. returns the value of body."
   [bindings & body]
   `(let [merge-handlers# (fn [chain-map# bindings#]
-                          (reduce-kv (fn [acc# k# v#]
-                                       (println acc# k# v#)
-                                       (if (contains? acc# k#)
-                                         (assoc acc# k# (conj (get acc# k#) v#))
-                                         (assoc acc# k# (list v# abort))))
-                                     chain-map#
-                                     bindings#))]
+                           (reduce-kv (fn [acc# k# v#]
+                                        (println acc# k# v#)
+                                        (if (contains? acc# k#)
+                                          (assoc acc# k# (conj (get acc# k#) v#))
+                                          (assoc acc# k# (list v# abort))))
+                                      chain-map#
+                                      bindings#))]
      (binding [*handlers* (merge-handlers# *handlers* (hash-map ~@bindings))]
        ~@body)))
