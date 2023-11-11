@@ -20,7 +20,7 @@
    :dist         {:id  "github"
                   :url "https://maven.pkg.github.com/hanjos/conditio-clj"}})
 
-; helper functions
+; helper functions and variables
 (def jar-file
   (let [{:keys [lib version dirs]} metadata
         {:keys [target]} dirs]
@@ -29,16 +29,12 @@
             version)))
 
 (def flags
-  ; filtering out nil values
   (into {}
-        (filter second)
+        (filter second) ; filtering out nil values
         {:verbose (System/getenv "CONDITIO_VERBOSE")}))
 
-(defn echo [& args]
-  (when (:verbose flags) (println (apply str args))))
-
-(defn pom-data [meta]
-  (let [{:keys [description scm license dist]} meta]
+(def pom-data
+  (let [{:keys [description scm license dist]} metadata]
     [[:description description]
      [:url (:url scm)]
      [:licenses
@@ -49,6 +45,9 @@
       [:repository
        [:id (:id dist)]
        [:url (:url dist)]]]]))
+
+(defn echo [& args]
+  (when (:verbose flags) (println (apply str args))))
 
 ; available commands
 (defn clean [_]
@@ -65,7 +64,7 @@
                   :version   version
                   :basis     basis
                   :src-dirs  [src]
-                  :pom-data  (pom-data metadata)})
+                  :pom-data  pom-data})
 
     (echo "Copying sources...")
     (b/copy-dir {:src-dirs   [src]
@@ -80,16 +79,17 @@
   (let [{:keys [lib version dirs description]} metadata
         {:keys [src doc]} dirs]
     (echo "Generating docs...")
-    (codox/generate-docs {:name         (name lib)
-                          :version      version
-                          :description  description
-                          :language     :clojure
-                          :output-path  doc
-                          :source-paths [src]
-                          :namespaces   ['org.sbrubbles.conditio 'org.sbrubbles.conditio.vars]
-                          :exclude-vars #"^(map)?->\p{Upper}"
-                          :metadata     {:doc/format :markdown}
-                          :themes       [:default]})))
+    (codox/generate-docs
+      {:name         (name lib)
+       :version      version
+       :description  description
+       :language     :clojure
+       :output-path  doc
+       :source-paths [src]
+       :namespaces   ['org.sbrubbles.conditio 'org.sbrubbles.conditio.vars]
+       :exclude-vars #"^(map)?->\p{Upper}"
+       :metadata     {:doc/format :markdown}
+       :themes       [:default]})))
 
 (defn version [_]
   (println (:version metadata)))
