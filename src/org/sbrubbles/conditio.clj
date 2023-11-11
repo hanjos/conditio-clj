@@ -30,7 +30,7 @@
          :else {::id id})))
 
 (defn abort
-  "Throws an exception, taking an optional argument. The 1-arity version
+  "Throws an exception, taking an optional argument. The 1-arity version also
   works as a handler."
   ([] (abort nil))
   ([c]
@@ -43,16 +43,16 @@
 
 (defn skip
   "Returns a value which, when returned by a handler, means that it opted not
-  to handle the condition, and the handler chain should try another handler.
+  to handle the condition, and the handler chain should try the next one in
+  line.
 
-  The 1-arity version is there to work as a handler, and returns the same
-  value."
+  The 1-arity version works as a handler, and returns the same value."
   ([] SKIP)
   ([_] SKIP))
 
 (def ^:dynamic *handlers*
-  "The available handlers, stored as handler chains. Use `handle` to register
-  new handlers.
+  "A map with the available handlers, stored as handler chains. Use `handle`
+  to install new handlers.
 
   A handler is a function which takes a condition and returns the value
   `signal` should return. A handler chain is a list of handlers, to be
@@ -61,7 +61,8 @@
    ::restart-not-found (list abort)})
 
 (def ^:dynamic *restarts*
-  "The available restarts. Use `with` to register new restarts.
+  "A map with the available restarts. Use `with` to install new restarts, and
+  `restart` to run them.
 
   A restart is a function which recovers from conditions, expected to be called
   from a handler."
@@ -75,10 +76,7 @@
 
 (defn- chain-handle
   "Attempts to handle the condition (`c`) with the given handler chain
-  (`chain`).
-
-  A handler chain is a sequence of handlers, to be run one at a time until
-  the first non-`(skip)` value is returned."
+  (`chain`)."
   [chain c]
   (transduce (comp (map #(% c))
                    (drop-while #(= % SKIP))
