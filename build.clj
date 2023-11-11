@@ -13,17 +13,12 @@
                   :doc     "target/doc"}
    :basis        (b/create-basis {:project "deps.edn"})
    :ignore-files [#"user.clj"]
-   :pom-data     [[:description "A simple condition system for Clojure, without too much machinery."]
-                  [:url "https://github.com/hanjos/conditio-clj"]
-                  [:licenses
-                   [:license
-                    [:name "MIT License"]
-                    [:url "https://github.com/hanjos/conditio-clj/blob/main/LICENSE"]]]
-                  [:distributionManagement
-                   [:repository
-                    [:id "github"]
-                    [:name "GitHub hanjos Apache Maven Packages"]
-                    [:url "https://maven.pkg.github.com/hanjos/conditio-clj"]]]]})
+   :description  "A simple condition system for Clojure, without too much machinery."
+   :scm          {:url "https://github.com/hanjos/conditio-clj"}
+   :license      {:name "MIT License"
+                  :url  "https://github.com/hanjos/conditio-clj/blob/main/LICENSE"}
+   :dist         {:id  "github"
+                  :url "https://maven.pkg.github.com/hanjos/conditio-clj"}})
 
 ; helper functions
 (def jar-file
@@ -42,6 +37,19 @@
 (defn echo [& args]
   (when (:verbose flags) (println (apply str args))))
 
+(defn pom-data [meta]
+  (let [{:keys [description scm license dist]} meta]
+    [[:description description]
+     [:url (:url scm)]
+     [:licenses
+      [:license
+       [:name (:name license)]
+       [:url (:url license)]]]
+     [:distributionManagement
+      [:repository
+       [:id (:id dist)]
+       [:url (:url dist)]]]]))
+
 ; available commands
 (defn clean [_]
   (let [{{:keys [target]} :dirs} metadata]
@@ -49,7 +57,7 @@
     (b/delete {:path target})))
 
 (defn jar [_]
-  (let [{:keys [lib version pom-data basis dirs ignore-files]} metadata
+  (let [{:keys [lib version basis dirs ignore-files]} metadata
         {:keys [src classes]} dirs]
     (echo "Writing POM...")
     (b/write-pom {:class-dir classes
@@ -57,7 +65,7 @@
                   :version   version
                   :basis     basis
                   :src-dirs  [src]
-                  :pom-data  pom-data})
+                  :pom-data  (pom-data metadata)})
 
     (echo "Copying sources...")
     (b/copy-dir {:src-dirs   [src]
@@ -69,9 +77,8 @@
             :jar-file  jar-file})))
 
 (defn doc [_]
-  (let [{:keys [lib version dirs]} metadata
-        {:keys [src doc]} dirs
-        description (get-in metadata [:pom-data 0 1])]
+  (let [{:keys [lib version dirs description]} metadata
+        {:keys [src doc]} dirs]
     (echo "Generating docs...")
     (codox/generate-docs {:name         (name lib)
                           :version      version
