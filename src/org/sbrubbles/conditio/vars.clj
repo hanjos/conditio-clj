@@ -12,7 +12,8 @@
     (binding [*rr* inc]
       (assert (= (*cc* 1) 2))))
   ```
-  ")
+  "
+  (:import (java.lang.reflect InaccessibleObjectException)))
 
 (defn- ->meta-map [maybe-map]
   (cond (string? maybe-map) {:doc maybe-map}
@@ -45,6 +46,53 @@
      `(def ~(with-meta name meta)
         (fn [& args#]
           (apply *restart-not-found* (conj args# ~(pr-str name))))))))
+
+(def ^:private SKIP (gensym))
+
+(defn skip
+  "Returns a value which, when returned by a handler, means that it opted not
+  to handle the condition, and another handler should be tried.
+
+  This function works as a handler by itself, and returns the same value."
+  [& _]
+  SKIP)
+
+(defn- field-get
+  "Returns the value in the field `<object>.<name>`, or `not-found` if the
+  field wasn't found or accessible."
+  ([object name]
+   (field-get object name nil))
+  ([object name not-found]
+   (try
+     (let [field (-> (class object)
+                     (.getDeclaredField name))]
+       (.setAccessible field true)
+       (.get field object))
+     (catch NullPointerException _
+       not-found)
+     (catch NoSuchFieldException _
+       not-found)
+     (catch SecurityException _
+       not-found)
+     (catch InaccessibleObjectException _
+       not-found))))
+
+(defn signal
+  "Searches for a handler for `v`, and invokes it with the given args.
+
+  `v` is expected to be a Var pointing to a condition."
+  [^clojure.lang.Var v & args]
+  (loop [f (clojure.lang.Var/getThreadBindingFrame)]
+    (if (nil? f)
+      ((.getRawRoot v) args)
+      (let [handler (-> f
+                        (field-get "bindings")
+                        (get v)
+                        (field-get "val" skip))
+            value (handler args)]
+        (if (not= value (skip))
+          value
+          (recur (field-get f "prev")))))))
 
 (defn bind-fn
   "Returns a function, which will install the bindings in `binding-map`

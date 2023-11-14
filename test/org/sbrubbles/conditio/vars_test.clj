@@ -77,3 +77,4 @@
       (is (= :success (f))))
 
     (is (= :success (bound-f)))))
+
