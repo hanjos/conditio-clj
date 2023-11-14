@@ -11,6 +11,7 @@
                   :target  "target"
                   :classes "target/classes"
                   :doc     "target/doc"}
+   :namespaces   ['org.sbrubbles.conditio]
    :basis        (b/create-basis {:project "deps.edn"})
    :ignore-files [#"user.clj"]
    :description  "A simple condition system for Clojure, without too much machinery."
@@ -76,7 +77,7 @@
             :jar-file  jar-file})))
 
 (defn doc [_]
-  (let [{:keys [lib version dirs description]} metadata
+  (let [{:keys [lib version dirs description namespaces]} metadata
         {:keys [src doc]} dirs]
     (echo "Generating docs...")
     (codox/generate-docs
@@ -86,7 +87,7 @@
        :language     :clojure
        :output-path  doc
        :source-paths [src]
-       :namespaces   ['org.sbrubbles.conditio 'org.sbrubbles.conditio.vars]
+       :namespaces   namespaces
        :exclude-vars #"^(map)?->\p{Upper}"
        :metadata     {:doc/format :markdown}
        :themes       [:default]})))
