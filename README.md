@@ -1,13 +1,13 @@
 A simple condition system for Clojure, without too much machinery.
 
-[![CI](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml/badge.svg)](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml) [![Docs](https://img.shields.io/static/v1?label=Docs&message=0.1.0&color=informational&logo=read-the-docs)][vLatest] [![Git package](https://img.shields.io/static/v1?label=Git&message=0.1.0&color=red&logo=git)][GitPackage] [![Maven package](https://img.shields.io/static/v1?label=Maven&message=0.1.0&color=orange&logo=apache-maven)][MavenPackage]
+[![CI](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml/badge.svg)](https://github.com/hanjos/conditio-clj/actions/workflows/ci.yml) [![Docs](https://img.shields.io/static/v1?label=Docs&message=0.2.0&color=informational&logo=read-the-docs)][vLatest] [![Git package](https://img.shields.io/static/v1?label=Git&message=0.2.0&color=red&logo=git)][GitPackage] [![Maven package](https://img.shields.io/static/v1?label=Maven&message=0.2.0&color=orange&logo=apache-maven)][MavenPackage]
 
 # Latest
 
 ### Git
 ```
 org.sbrubbles/conditio-clj {:git/url "https://github.com/hanjos/conditio-clj" 
-                            :git/tag "0.1.0"  :git/sha "1be4a0a"}
+                            :git/tag "0.2.0"  :git/sha "8eb8b2eb"}
 ```
 
 ### Maven 
@@ -29,7 +29,7 @@ Add this repo to your `deps.edn`:
 
 And then:
 ```
-org.sbrubbles/conditio-clj {:mvn/version "0.1.0"}
+org.sbrubbles/conditio-clj {:mvn/version "0.2.0"}
 ```                                                                       
 
 # What 
@@ -99,6 +99,6 @@ The end result should look something like this:
  [conditio-java](https://github.com/hanjos/conditio-java), although almost everything is there.
 * ~~I could've used vars instead of keywords.~~ For now, I'm going with [keywords](DESIGN.md). Vars seem to require too much magic...
 
-[vLatest]: https://sbrubbles.org/conditio-clj/docs/0.1.0/index.html
+[vLatest]: https://sbrubbles.org/conditio-clj/docs/0.2.0/index.html
 [MavenPackage]: https://github.com/hanjos/conditio-clj/packages/1968125
-[GitPackage]: https://github.com/hanjos/conditio-clj/tree/1be4a0a7da7e2026bda32683ef10bbf5bf40bcbe
+[GitPackage]: https://github.com/hanjos/conditio-clj/tree/8eb8b2ebd05263cc996cb559a74e15ac7d0bc349
