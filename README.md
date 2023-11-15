@@ -69,14 +69,15 @@ The end result should look something like this:
 
 (defn parse-log-file []
   ; creates a function which calls parse-log-entry with :user/skip-entry 
-  ; as an available restart  
+  ; as an available restart. Any entries which return 'skip-entry will
+  ; be skipped
   (comp (map (c/with-fn parse-log-entry
-                        {::skip-entry (fn [] ::skip-entry)}))
-        (filter #(not= % ::skip-entry))))
+                        {::skip-entry (fn [] 'skip-entry)}))
+        (filter #(not= % 'skip-entry))))
 
 (defn analyze-logs [& args]
-  ; handles :user/malformed-log-entry conditions, restarting with 
-  ; :user/skip-entry
+  ; handles :user/malformed-log-entry conditions, opting to restart 
+  ; with :user/skip-entry
   (c/handle [::malformed-log-entry (fn [_] (c/restart ::skip-entry))]
     (into []
           (comp cat
