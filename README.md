@@ -97,9 +97,7 @@ The end result should look something like this:
 # Caveats and stuff to mull over
 * Despite what the name might suggest, I didn't try to maintain parity with
  [conditio-java](https://github.com/hanjos/conditio-java), although almost everything is there.
-* I could've used vars instead of keywords. I'm not sure which one works 
-better; so [some experiments](DESIGN.md) are in order...
-
+* ~~I could've used vars instead of keywords.~~ For now, I'm going with [keywords](DESIGN.md). Vars seem to require too much magic...
 
 [vLatest]: https://sbrubbles.org/conditio-clj/docs/0.1.0/index.html
 [MavenPackage]: https://github.com/hanjos/conditio-clj/packages/1968125
