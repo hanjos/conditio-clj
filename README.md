@@ -7,7 +7,7 @@ A simple condition system for Clojure, without too much machinery.
 ### Git
 ```
 org.sbrubbles/conditio-clj {:git/url "https://github.com/hanjos/conditio-clj" 
-                            :git/tag "0.2.0"  :git/sha "8eb8b2eb"}
+                            :git/tag "0.2.0"  :git/sha "d99c9c3"}
 ```
 
 ### Maven 
@@ -101,4 +101,4 @@ The end result should look something like this:
 
 [vLatest]: https://sbrubbles.org/conditio-clj/docs/0.2.0/index.html
 [MavenPackage]: https://github.com/hanjos/conditio-clj/packages/1968125
-[GitPackage]: https://github.com/hanjos/conditio-clj/tree/8eb8b2ebd05263cc996cb559a74e15ac7d0bc349
+[GitPackage]: https://github.com/hanjos/conditio-clj/tree/d99c9c36d35571da177d5d69957e56da0dd34693
