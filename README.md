@@ -60,7 +60,7 @@ The end result should look something like this:
 ; to simplify matters 
 
 (defn parse-log-entry [line]
-  (if (not (= line :fail)) ; :fail represents a malformed log entry
+  (if (not= line :fail) ; :fail represents a malformed log entry
     line
     ; adds :user/retry-with as an available restart
     (c/with [::retry-with parse-log-entry]
@@ -72,7 +72,7 @@ The end result should look something like this:
   ; as an available restart  
   (comp (map (c/with-fn parse-log-entry
                         {::skip-entry (fn [] ::skip-entry)}))
-        (filter #(not (= % ::skip-entry)))))
+        (filter #(not= % ::skip-entry))))
 
 (defn analyze-logs [& args]
   ; handles :user/malformed-log-entry conditions, restarting with 
