@@ -71,8 +71,8 @@ The end result should look something like this:
   ; creates a function which calls parse-log-entry with :user/skip-entry 
   ; as an available restart. Any entries which return 'skip-entry will
   ; be skipped
-  (comp (map (c/with-fn parse-log-entry
-                        {::skip-entry (fn [] 'skip-entry)}))
+  (comp (map (c/with-fn {::skip-entry (fn [] 'skip-entry)}
+                        parse-log-entry))
         (filter #(not= % 'skip-entry))))
 
 (defn analyze-logs [& args]
