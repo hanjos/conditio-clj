@@ -17,3 +17,8 @@ Skipping helped distinguish the approaches; I was able to add it with keywords w
 
 **Decision**: I'll go with keywords, and remove the vars "fork".
 
+## 0.3.0
+
+### vars again...
+
+I realized my previous attempt was complicating things more than needed, and something closer to the keywords API could work well. So round 2... 
