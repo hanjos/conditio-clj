@@ -99,4 +99,11 @@
            (r 1 2 3)
            (list 1 2 3))))
 
+  (let [r-prime (v/with-fn {#'r list}
+                           (fn [& args] (apply r args)))]
+    (is (= (r-prime 1 2 3)
+           (list 1 2 3)))
+
+    (is (thrown? ExceptionInfo (r 1 2 3))))
+
   (is (thrown? ExceptionInfo (r 1 2 3))))
