@@ -1,21 +1,41 @@
 (ns org.sbrubbles.conditio.vars)
 
 (defn abort
+  "Throws an exception, taking an optional argument."
   [msg & args]
   (throw (ex-info (str msg) {:args args})))
 
 (def ^:private SKIP (gensym "SKIP-"))
 
 (defn skip
+  "Returns a value which, when returned by a handler, means that it opted not
+  to handle the condition, and the handler chain should try the next one in
+  line.
+
+  Also works as a handler."
   [& _]
   SKIP)
 
 (declare handler-not-found)
 (declare restart-not-found)
 
-(def ^:dynamic *handlers* {#'handler-not-found (list (partial abort #'handler-not-found))
-                           #'restart-not-found (list (partial abort #'restart-not-found))})
-(def ^:dynamic *restarts* {})
+(def ^:dynamic *handlers*
+  "A map with the available handlers, stored as handler chains. Use `handle`
+  to install new handlers.
+
+  A handler is a function which takes any number of arguments and returns the
+  end result. A handler chain is a list of handlers, to be run one at a time
+  until the first non-`(skip)` value is returned."
+  {#'handler-not-found (list (partial abort #'handler-not-found))
+   #'restart-not-found (list (partial abort #'restart-not-found))})
+
+(def ^:dynamic *restarts*
+  "A map with the available restarts. Use `with` to install new restarts, and
+  `restart` to run them.
+
+  A restart is a function which recovers from conditions, expected to be called
+  from a handler."
+  {})
 
 (defn- run-handler
   [chain args]
@@ -26,7 +46,12 @@
              nil
              chain))
 
-(defn signal [v & args]
+(defn signal
+  "Signals the condition `v`, searching for a handler and returning whatever it
+  returns. `v` is expected to be a var created with `defcondition`.
+
+  Signals `handler-not-found` if a handler couldn't be found."
+  [v & args]
   (if-let [chain (get *handlers* v)]
     (run-handler chain args)
     (handler-not-found {:condition v :args args})))
@@ -38,15 +63,21 @@
         :else {:metadata obj}))
 
 (defmacro defcondition
+  "Creates a new condition; basically, a function which `signal`s itself when
+  called."
   ([v] `(defcondition ~v {}))
   ([v metadata]
    `(def ~(with-meta v (->metadata metadata))
       (partial signal (var ~v)))))
 
-(defcondition handler-not-found)
-(defcondition restart-not-found)
+(defcondition handler-not-found
+              "Signalled when a handler couldn't be found.")
+(defcondition restart-not-found
+              "Signalled when a restart couldn't be found.")
 
 (defmacro handle
+  "Installs the given bindings in `*handlers*`, executes `body`, and returns
+  its result."
   [bindings & body]
   (let [var-ize (fn [var-vals]
                   (loop [ret []
@@ -67,18 +98,25 @@
          ~@body))))
 
 (defn restart
+  "Searches for a restart mapped to `option`, and then runs it with `args`.
+
+  Signals `restart-not-found` if no restart could be found."
   [v & args]
   (if-let [r (get *restarts* v)]
     (apply r args)
     (restart-not-found {:condition v :args args})))
 
 (defmacro defrestart
+  "Creates a restart: basically, a function which `restart`s itself when
+  called."
   ([v] `(defrestart ~v {}))
   ([v metadata]
    `(def ~(with-meta v (->metadata metadata))
       (partial restart (var ~v)))))
 
 (defmacro with
+  "Installs the given bindings in `*restarts*`, executes `body`, and returns
+  its result."
   [bindings & body]
   (let [var-ize (fn [var-vals]
                   (loop [ret []
@@ -91,6 +129,9 @@
        ~@body)))
 
 (defn with-fn
+  "Returns a function, which will install the given restarts and then run `f`.
+  This may be used to define a helper function which runs on a different
+  thread, but needs the given restarts in place."
   [binding-map f]
   (with-bindings*
     {#'*restarts* (merge *restarts* binding-map)}

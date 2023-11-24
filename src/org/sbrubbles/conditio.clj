@@ -119,8 +119,8 @@
 (defn restart
   "Searches for a restart mapped to `option`, and then runs it with `args`.
 
-  Signals `:org.sbrubbles.conditio/restart-not-found` if no restart mapped to
-  option could be found."
+  Signals `:org.sbrubbles.conditio/restart-not-found` if no restart could be
+  found."
   [option & args]
   (if-let [restart (*restarts* option)]
     (apply restart args)

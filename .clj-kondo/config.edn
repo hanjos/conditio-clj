@@ -5,8 +5,8 @@
 
  :lint-as {org.sbrubbles.conditio.vars/defcondition clj-kondo.lint-as/def-catch-all
            org.sbrubbles.conditio.vars/defrestart   clj-kondo.lint-as/def-catch-all
-           org.sbrubbles.conditio.vars/handle       clj-kondo.lint-as/def-catch-all
-           org.sbrubbles.conditio.vars/with         clj-kondo.lint-as/def-catch-all}
+           org.sbrubbles.conditio.vars/handle       clojure.core/let
+           org.sbrubbles.conditio.vars/with         clojure.core/let}
 
  :output  {:exclude-files ["README.md" "src/user.clj" "build.clj" "test"]}}
 
