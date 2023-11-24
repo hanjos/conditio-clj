@@ -107,3 +107,20 @@
     (is (thrown? ExceptionInfo (r 1 2 3))))
 
   (is (thrown? ExceptionInfo (r 1 2 3))))
+
+(deftest handle-and-with
+  (v/handle [c #(r %)]
+    (v/with [r inc]
+      (is (= (c 1) 2))))
+
+  (v/with [r inc]
+    (v/handle [c #(r %)]
+      (is (= (c 1) 2)))))
+
+(deftest skipping-handlers
+  (v/handle [c inc]
+    (v/handle [c #(if (even? %)
+                    :even
+                    (v/skip))]
+      (is (= (c 1) 2))
+      (is (= (c 2) :even)))))

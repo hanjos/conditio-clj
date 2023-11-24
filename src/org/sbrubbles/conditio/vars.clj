@@ -1,4 +1,18 @@
-(ns org.sbrubbles.conditio.vars)
+(ns org.sbrubbles.conditio.vars
+  "A variation on `org.sbrubbles.conditio`, which uses vars instead of keywords.
+
+  Example usage:
+  ```clojure
+  (require '[org.sbrubbles.conditio.vars :as v])
+
+  (v/defcondition condition)
+  (v/defrestart r)
+
+  (v/handle [condition #(r %)]
+    (v/with [r inc]
+      (assert (= (condition 1)
+                 2))))
+  ```")
 
 (defn abort
   "Throws an exception, taking an optional argument."

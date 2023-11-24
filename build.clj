@@ -11,7 +11,8 @@
                   :target  "target"
                   :classes "target/classes"
                   :doc     "target/doc"}
-   :namespaces   ['org.sbrubbles.conditio]
+   :namespaces   ['org.sbrubbles.conditio
+                  'org.sbrubbles.conditio.vars]
    :basis        (b/create-basis {:project "deps.edn"})
    :ignore-files [#"user.clj"]
    :description  "A simple condition system for Clojure, without too much machinery."
