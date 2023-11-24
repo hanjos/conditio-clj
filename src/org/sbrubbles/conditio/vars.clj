@@ -1,10 +1,8 @@
 (ns org.sbrubbles.conditio.vars)
 
 (defn abort
-  ([msg]
-   (partial abort msg))
-  ([msg & args]
-   (throw (ex-info (str msg) {:args args}))))
+  [msg & args]
+  (throw (ex-info (str msg) {:args args})))
 
 (def ^:private SKIP (gensym "SKIP-"))
 
@@ -15,8 +13,8 @@
 (declare handler-not-found)
 (declare restart-not-found)
 
-(def ^:dynamic *handlers* {#'handler-not-found (list (abort #'handler-not-found))
-                           #'restart-not-found (list (abort #'restart-not-found))})
+(def ^:dynamic *handlers* {#'handler-not-found (list (partial abort #'handler-not-found))
+                           #'restart-not-found (list (partial abort #'restart-not-found))})
 (def ^:dynamic *restarts* {})
 
 (defn- run-handler
@@ -35,16 +33,15 @@
 
 (defn- ->metadata
   [obj]
-  (cond (string? obj) {:docs obj}
+  (cond (string? obj) {:doc obj}
         (map? obj) obj
-        :else {:data obj}))
+        :else {:metadata obj}))
 
 (defmacro defcondition
   ([v] `(defcondition ~v {}))
   ([v metadata]
    `(def ~(with-meta v (->metadata metadata))
-      (fn [& args#]
-        (signal ~(resolve v) args#)))))
+      (partial signal (var ~v)))))
 
 (defcondition handler-not-found)
 (defcondition restart-not-found)
@@ -79,8 +76,7 @@
   ([v] `(defrestart ~v {}))
   ([v metadata]
    `(def ~(with-meta v (->metadata metadata))
-      (fn [& args#]
-        (apply restart ~(resolve v) args#)))))
+      (partial restart (var ~v)))))
 
 (defmacro with
   [bindings & body]
