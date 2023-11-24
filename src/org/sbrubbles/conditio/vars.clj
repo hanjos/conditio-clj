@@ -71,9 +71,9 @@
       (partial signal (var ~v)))))
 
 (defcondition handler-not-found
-              "Signalled when a handler couldn't be found.")
+  "Signalled when a handler couldn't be found.")
 (defcondition restart-not-found
-              "Signalled when a restart couldn't be found.")
+  "Signalled when a restart couldn't be found.")
 
 (defmacro handle
   "Installs the given bindings in `*handlers*`, executes `body`, and returns

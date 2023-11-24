@@ -79,12 +79,12 @@
   (is (thrown? ExceptionInfo (c 1 2 3)))
 
   (v/handle [c list]
-            (is (= (v/*handlers* #'c)
-                   (list list)))
+    (is (= (v/*handlers* #'c)
+           (list list)))
 
-            (is (= (v/signal #'c 1 2 3)
-                   (c 1 2 3)
-                   (list 1 2 3))))
+    (is (= (v/signal #'c 1 2 3)
+           (c 1 2 3)
+           (list 1 2 3))))
 
   (is (thrown? ExceptionInfo (c 1 2 3))))
 
@@ -92,11 +92,11 @@
   (is (thrown? ExceptionInfo (r 1 2 3)))
 
   (v/with [r list]
-          (is (= (v/*restarts* #'r)
-                 list))
+    (is (= (v/*restarts* #'r)
+           list))
 
-          (is (= (v/restart #'r 1 2 3)
-                 (r 1 2 3)
-                 (list 1 2 3))))
+    (is (= (v/restart #'r 1 2 3)
+           (r 1 2 3)
+           (list 1 2 3))))
 
   (is (thrown? ExceptionInfo (r 1 2 3))))
