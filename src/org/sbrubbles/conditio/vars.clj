@@ -81,7 +81,8 @@
   called."
   ([v] `(defcondition ~v {}))
   ([v metadata]
-   `(def ~(with-meta v (->metadata metadata))
+   `(def ~(with-meta v (merge (->metadata metadata)
+                              {:arglists `'([& ~'args])}))
       (partial signal (var ~v)))))
 
 (defcondition handler-not-found
@@ -125,7 +126,8 @@
   called."
   ([v] `(defrestart ~v {}))
   ([v metadata]
-   `(def ~(with-meta v (->metadata metadata))
+   `(def ~(with-meta v (merge (->metadata metadata)
+                              {:arglists `'([& ~'args])}))
       (partial restart (var ~v)))))
 
 (defmacro with
