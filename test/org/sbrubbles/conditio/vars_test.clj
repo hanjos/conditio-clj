@@ -86,6 +86,12 @@
            (c 1 2 3)
            (list 1 2 3))))
 
+  (let [c-prime (v/handle-fn {#'c list}
+                             (fn [& args]
+                               (apply c args)))]
+    (is (= (c-prime 1 2 3)
+           (list 1 2 3))))
+
   (is (thrown? ExceptionInfo (c 1 2 3))))
 
 (deftest restarting

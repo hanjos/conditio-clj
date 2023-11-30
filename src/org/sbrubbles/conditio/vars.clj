@@ -101,16 +101,34 @@
                       (recur (conj (conj ret `(var ~(first vvs))) (second vvs))
                              (next (next vvs)))
                       (seq ret))))]
-    `(let [merge-bindings# (fn [chain-map# bindings#]
-                             (reduce-kv (fn [acc# k# v#]
-                                          (assoc acc# k# (if (contains? acc# k#)
-                                                           (conj (get acc# k#) v#)
-                                                           (list v#))))
-                                        chain-map#
-                                        bindings#))]
-       (binding [*handlers* (merge-bindings# *handlers*
-                                             (hash-map ~@(var-ize bindings)))]
+    `(let [merge# (fn [chain-map# bindings#]
+                    (reduce-kv (fn [acc# k# v#]
+                                 (assoc acc# k# (if (contains? acc# k#)
+                                                  (conj (get acc# k#) v#)
+                                                  (list v#))))
+                               chain-map#
+                               bindings#))]
+       (binding [*handlers* (merge# *handlers*
+                                    (hash-map ~@(var-ize bindings)))]
          ~@body))))
+
+(defn handle-fn
+  "Returns a function, which will install the given handlers (in a
+  var-function map) and then run `f`.
+
+  This may be used to define a helper function which runs on a different
+  thread, but needs the given handlers in place."
+  [binding-map f]
+  (let [merge-bindings (fn [chain-map# bindings#]
+                         (reduce-kv (fn [acc# k# v#]
+                                      (assoc acc# k# (if (contains? acc# k#)
+                                                       (conj (get acc# k#) v#)
+                                                       (list v#))))
+                                    chain-map#
+                                    bindings#))]
+    (with-bindings*
+      {#'*handlers* (merge-bindings *handlers* binding-map)}
+      (fn [] (bound-fn* f)))))
 
 (defn restart
   "Searches for a restart mapped to `option`, and then runs it with `args`.
@@ -146,6 +164,7 @@
 
 (defn with-fn
   "Returns a function, which will install the given restarts and then run `f`.
+  
   This may be used to define a helper function which runs on a different
   thread, but needs the given restarts in place."
   [binding-map f]

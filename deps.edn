@@ -3,30 +3,38 @@
  :deps      {}
 
  :aliases
- {:test     {:extra-paths ["test"]}
+ {:test   {:extra-paths ["test"]}
 
   ;; clojure -X:test:runner
   ;; clojure -X:test:runner :fail-fast? false
-  :runner   {:extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}
-                          lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}}
-             :exec-fn    kaocha.runner/exec-fn
-             :exec-args  {:kaocha/reporter [kaocha.report/documentation]
-                          :kaocha/plugins  [:kaocha.plugin/profiling
-                                            :kaocha.plugin/cloverage]}
-             :jvm-opts   ["-XX:-OmitStackTraceInFastThrow"]}
+  :runner {:extra-deps {lambdaisland/kaocha           {:mvn/version "1.87.1366"}
+                        lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}}
+           :exec-fn    kaocha.runner/exec-fn
+           :exec-args  {:kaocha/reporter [kaocha.report/documentation]
+                        :kaocha/plugins  [:kaocha.plugin/profiling
+                                          :kaocha.plugin/cloverage]}
+           :jvm-opts   ["-XX:-OmitStackTraceInFastThrow"]}
+
+  ;; clojure -X:test:runner:watch
+  :watch  {:exec-args {:watch?          true
+                       :skip-meta       :slow
+                       :fail-fast?      true
+                       :kaocha/reporter [kaocha.report/documentation]
+                       :kaocha/plugins  [:kaocha.plugin/profiling
+                                         :kaocha.plugin/cloverage]}}
 
   ;; clojure -T:build <fn> <opts>
-  :build    {:extra-paths ["src"] ; XXX required for codox
-             :deps        {io.github.clojure/tools.build {:mvn/version "0.9.6"}
-                           codox/codox                   {:mvn/version "0.10.8"}}
-             :ns-default  build}
+  :build  {:extra-paths ["src"] ; XXX required for codox
+           :deps        {io.github.clojure/tools.build {:mvn/version "0.9.6"}
+                         codox/codox                   {:mvn/version "0.10.8"}}
+           :ns-default  build}
 
   ;; clojure -M:build:test:repl
-  :repl     {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
-                          cider/cider-nrepl {:mvn/version "0.40.0"}}
-             :main-opts  ["-m" "nrepl.cmdline"
-                          "--color" "--interactive"
-                          "--middleware" "[cider.nrepl/cider-middleware]"]}}
+  :repl   {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
+                        cider/cider-nrepl {:mvn/version "0.40.0"}}
+           :main-opts  ["-m" "nrepl.cmdline"
+                        "--color" "--interactive"
+                        "--middleware" "[cider.nrepl/cider-middleware]"]}}
 
  ;; XXX required for GitHub Packages
  :mvn/repos {"github" {:url       "https://maven.pkg.github.com/hanjos/conditio-clj"
