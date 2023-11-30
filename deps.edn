@@ -16,12 +16,9 @@
            :jvm-opts   ["-XX:-OmitStackTraceInFastThrow"]}
 
   ;; clojure -X:test:runner:watch
-  :watch  {:exec-args {:watch?          true
-                       :skip-meta       :slow
-                       :fail-fast?      true
-                       :kaocha/reporter [kaocha.report/documentation]
-                       :kaocha/plugins  [:kaocha.plugin/profiling
-                                         :kaocha.plugin/cloverage]}}
+  :watch  {:exec-args {:watch?     true
+                       :skip-meta  :slow
+                       :fail-fast? true}}
 
   ;; clojure -T:build <fn> <opts>
   :build  {:extra-paths ["src"] ; XXX required for codox
