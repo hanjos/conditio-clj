@@ -1,4 +1,4 @@
-(ns org.sbrubbles.conditio-test.examples.parse-log-entry-test
+(ns org.sbrubbles.conditio.examples.parse-log-entry-test
   (:require
     [clojure.test :refer :all]
     [org.sbrubbles.conditio :as c])

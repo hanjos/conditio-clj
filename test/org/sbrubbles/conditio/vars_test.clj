@@ -78,39 +78,56 @@
 (deftest handling
   (is (thrown? ExceptionInfo (c 1 2 3)))
 
-  (v/handle [c list]
-    (is (= (v/*handlers* #'c)
-           (list list)))
+  (testing "calling c is the same as calling v/signal"
+    (v/handle [c list]
+      (is (= (v/*handlers* #'c)
+             (list list)))
 
-    (is (= (v/signal #'c 1 2 3)
-           (c 1 2 3)
-           (list 1 2 3))))
+      (is (= (v/signal #'c 1 2 3)
+             (c 1 2 3)
+             (list 1 2 3)))))
 
-  (let [c-prime (v/handle-fn {#'c list}
-                             (fn [& args]
-                               (apply c args)))]
-    (is (= (c-prime 1 2 3)
-           (list 1 2 3))))
+  (testing "v/handle-fn and v/handle"
+    (let [c-prime (v/handle-fn {#'c list}
+                               (fn [& args]
+                                 (apply c args)))]
+      (is (= (c-prime 1 2 3)
+             (list 1 2 3))))
+
+    (v/handle [c v/abort]
+      (let [c-prime (v/handle-fn {#'c list}
+                                 (fn [& args]
+                                   (apply c args)))]
+        (is (= (c-prime 1 2 3)
+               (list 1 2 3))))))
 
   (is (thrown? ExceptionInfo (c 1 2 3))))
 
 (deftest restarting
   (is (thrown? ExceptionInfo (r 1 2 3)))
 
-  (v/with [r list]
-    (is (= (v/*restarts* #'r)
-           list))
+  (testing "calling r is the same as calling v/restart"
+    (v/with [r list]
+      (is (= (v/*restarts* #'r)
+             list))
 
-    (is (= (v/restart #'r 1 2 3)
-           (r 1 2 3)
-           (list 1 2 3))))
+      (is (= (v/restart #'r 1 2 3)
+             (r 1 2 3)
+             (list 1 2 3)))))
 
-  (let [r-prime (v/with-fn {#'r list}
-                           (fn [& args] (apply r args)))]
-    (is (= (r-prime 1 2 3)
-           (list 1 2 3)))
+  (testing "v/with-fn and v/with"
+    (let [r-prime (v/with-fn {#'r list}
+                             (fn [& args] (apply r args)))]
+      (is (= (r-prime 1 2 3)
+             (list 1 2 3)))
 
-    (is (thrown? ExceptionInfo (r 1 2 3))))
+      (is (thrown? ExceptionInfo (r 1 2 3))))
+
+    (v/with [r v/abort]
+      (let [r-prime (v/with-fn {#'r list}
+                               (fn [& args] (apply r args)))]
+        (is (= (r-prime 1 2 3)
+               (list 1 2 3))))))
 
   (is (thrown? ExceptionInfo (r 1 2 3))))
 
