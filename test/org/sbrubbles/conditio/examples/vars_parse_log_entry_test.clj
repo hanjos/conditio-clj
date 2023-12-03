@@ -54,6 +54,6 @@
        [">>> a" ">>> b" ">>> c" ">>> X" ">>> X" ">>> X" ">>> d" ">>> X" ">>> e"]))
 
 (deftest abort-analyze
-  (let [analyze-log* (select-handler analyze-logs v/abort)]
+  (binding [*selected-handler* v/abort]
     (is (thrown? ExceptionInfo
-                 (analyze-log* ["a" :fail])))))
+                 (analyze-logs ["a" :fail])))))

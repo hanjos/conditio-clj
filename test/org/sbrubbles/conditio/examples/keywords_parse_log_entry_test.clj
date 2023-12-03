@@ -1,4 +1,4 @@
-(ns org.sbrubbles.conditio.examples.parse-log-entry-test
+(ns org.sbrubbles.conditio.examples.keywords-parse-log-entry-test
   (:require
     [clojure.test :refer :all]
     [org.sbrubbles.conditio :as c])
@@ -49,6 +49,6 @@
        [">>> a" ">>> b" ">>> c" ">>> X" ">>> X" ">>> X" ">>> d" ">>> X" ">>> e"]))
 
 (deftest abort-analyze
-  (let [analyze-log* (select-handler analyze-logs c/abort)]
+  (binding [*selected-handler* c/abort]
     (is (thrown-with-msg? ExceptionInfo #"Abort"
-                          (analyze-log* ["a" :fail])))))
+                          (analyze-logs ["a" :fail])))))

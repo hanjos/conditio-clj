@@ -6,10 +6,10 @@
   (require '[org.sbrubbles.conditio.vars :as v])
 
   (v/defcondition condition)
-  (v/defrestart r)
+  (v/defrestart restart)
 
-  (v/handle [condition #(r %)]
-    (v/with [r inc]
+  (v/handle [condition #(restart %)]
+    (v/with [restart inc]
       (assert (= (condition 1)
                  2))))
   ```")
@@ -78,7 +78,7 @@
 
 (defmacro defcondition
   "Creates a new condition; basically, a function which `signal`s itself when
-  called."
+  called. `metadata` is expected to be either a doc-string or a metadata map."
   ([v] `(defcondition ~v {}))
   ([v metadata]
    `(def ~(with-meta v (merge (->metadata metadata)
@@ -86,9 +86,9 @@
       (partial signal (var ~v)))))
 
 (defcondition handler-not-found
-  "Signalled when a handler couldn't be found.")
+  "A condition which signals when a handler couldn't be found.")
 (defcondition restart-not-found
-  "Signalled when a restart couldn't be found.")
+  "A condition which signals when a restart couldn't be found.")
 
 (defmacro handle
   "Installs the given bindings in `*handlers*`, executes `body`, and returns
@@ -119,13 +119,13 @@
   This may be used to define a helper function which runs on a different
   thread, but needs the given handlers in place."
   [binding-map f]
-  (let [merge-bindings (fn [chain-map# bindings#]
-                         (reduce-kv (fn [acc# k# v#]
-                                      (assoc acc# k# (if (contains? acc# k#)
-                                                       (conj (get acc# k#) v#)
-                                                       (list v#))))
-                                    chain-map#
-                                    bindings#))]
+  (let [merge-bindings (fn [chain-map bindings]
+                         (reduce-kv (fn [acc k v]
+                                      (assoc acc k (if (contains? acc k)
+                                                     (conj (get acc k) v)
+                                                     (list v))))
+                                    chain-map
+                                    bindings))]
     (with-bindings*
       {#'*handlers* (merge-bindings *handlers* binding-map)}
       (fn [] (bound-fn* f)))))
@@ -141,7 +141,7 @@
 
 (defmacro defrestart
   "Creates a restart: basically, a function which `restart`s itself when
-  called."
+  called. `metadata` is expected to be either a doc-string or a metadata map."
   ([v] `(defrestart ~v {}))
   ([v metadata]
    `(def ~(with-meta v (merge (->metadata metadata)
@@ -164,7 +164,7 @@
 
 (defn with-fn
   "Returns a function, which will install the given restarts and then run `f`.
-  
+
   This may be used to define a helper function which runs on a different
   thread, but needs the given restarts in place."
   [binding-map f]
