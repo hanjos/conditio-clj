@@ -74,7 +74,7 @@
   [binding-map f]
   (with-bindings* binding-map (fn [] (bound-fn* f))))
 
-(defn- chain-handle
+(defn- run-handler
   "Attempts to handle the condition (`c`) with the given handler chain
   (`chain`)."
   [chain c]
@@ -95,7 +95,7 @@
   [id & {:as args}]
   (let [c (condition id args)]
     (if-let [chain (get *handlers* (::id c))]
-      (chain-handle chain c)
+      (run-handler chain c)
       (signal ::handler-not-found :condition c))))
 
 (defn with-fn

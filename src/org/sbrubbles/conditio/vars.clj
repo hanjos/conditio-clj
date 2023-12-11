@@ -52,6 +52,7 @@
   {})
 
 (defn- run-handler
+  "Runs handler chains, returning the first non-(skip) value."
   [chain args]
   (transduce (comp (map #(apply % args))
                    (drop-while #(= % SKIP))
@@ -71,6 +72,7 @@
     (handler-not-found {:condition v :args args})))
 
 (defn- ->metadata
+  "For def*'s. Converts values into a metadata map (for (meta))."
   [obj]
   (cond (string? obj) {:doc obj}
         (map? obj) obj
@@ -90,27 +92,33 @@
 (defcondition restart-not-found
   "A condition which signals when a restart couldn't be found.")
 
+(defn- var-ize
+  "For binding-style macros. Converts pairs into a map."
+  [var-vals]
+  (loop [ret []
+         vvs (seq var-vals)]
+    (if vvs
+      (recur (conj (conj ret `(var ~(first vvs))) (second vvs))
+             (next (next vvs)))
+      (seq ret))))
+
+(defn- merge-bindings
+  "For `handle` macros. Adds a new handler to a handler chain."
+  [chain-map bindings]
+  (reduce-kv (fn [acc k v]
+               (assoc acc k (if (contains? acc k)
+                              (conj (get acc k) v)
+                              (list v))))
+             chain-map
+             bindings))
+
 (defmacro handle
   "Installs the given bindings in `*handlers*`, executes `body`, and returns
   its result."
   [bindings & body]
-  (let [var-ize (fn [var-vals]
-                  (loop [ret []
-                         vvs (seq var-vals)]
-                    (if vvs
-                      (recur (conj (conj ret `(var ~(first vvs))) (second vvs))
-                             (next (next vvs)))
-                      (seq ret))))]
-    `(let [merge# (fn [chain-map# bindings#]
-                    (reduce-kv (fn [acc# k# v#]
-                                 (assoc acc# k# (if (contains? acc# k#)
-                                                  (conj (get acc# k#) v#)
-                                                  (list v#))))
-                               chain-map#
-                               bindings#))]
-       (binding [*handlers* (merge# *handlers*
-                                    (hash-map ~@(var-ize bindings)))]
-         ~@body))))
+  `(binding [*handlers* (~merge-bindings *handlers*
+                                         (hash-map ~@(var-ize bindings)))]
+     ~@body))
 
 (defn handle-fn
   "Returns a function, which will install the given handlers (in a
@@ -119,19 +127,12 @@
   This may be used to define a helper function which runs on a different
   thread, but needs the given handlers in place."
   [binding-map f]
-  (let [merge-bindings (fn [chain-map bindings]
-                         (reduce-kv (fn [acc k v]
-                                      (assoc acc k (if (contains? acc k)
-                                                     (conj (get acc k) v)
-                                                     (list v))))
-                                    chain-map
-                                    bindings))]
-    (with-bindings*
-      {#'*handlers* (merge-bindings *handlers* binding-map)}
-      (fn [] (bound-fn* f)))))
+  (with-bindings*
+    {#'*handlers* (merge-bindings *handlers* binding-map)}
+    (fn [] (bound-fn* f))))
 
 (defn restart
-  "Searches for a restart mapped to `option`, and then runs it with `args`.
+  "Searches for a restart mapped to `v`, and then runs it with `args`.
 
   Signals `restart-not-found` if no restart could be found."
   [v & args]
@@ -152,15 +153,9 @@
   "Installs the given bindings in `*restarts*`, executes `body`, and returns
   its result."
   [bindings & body]
-  (let [var-ize (fn [var-vals]
-                  (loop [ret []
-                         vvs (seq var-vals)]
-                    (if vvs
-                      (recur (conj (conj ret `(var ~(first vvs))) (second vvs))
-                             (next (next vvs)))
-                      (seq ret))))]
-    `(binding [*restarts* (merge *restarts* (hash-map ~@(var-ize bindings)))]
-       ~@body)))
+  `(binding [*restarts* (merge *restarts*
+                               (hash-map ~@(var-ize bindings)))]
+     ~@body))
 
 (defn with-fn
   "Returns a function, which will install the given restarts and then run `f`.
