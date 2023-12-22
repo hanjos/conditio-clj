@@ -17,6 +17,8 @@ pom.xml.asc
 .lock
 inline-configs/
 
+**/.DS_Store
+
 *.iml
 .idea/
 
