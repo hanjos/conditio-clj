@@ -1,15 +1,16 @@
 (ns org.sbrubbles.conditio.vars
   "A variation on `org.sbrubbles.conditio`, which uses vars instead of keywords.
+  There is no machinery for restarts; dynamic variables cover all intended uses.
 
   Example usage:
   ```clojure
   (require '[org.sbrubbles.conditio.vars :as v])
 
   (v/defcondition condition)
-  (v/defrestart restart)
+  (def ^:dynamic *restart* (partial v/abort \"No restart defined!\"))
 
-  (v/handle [condition #(restart %)]
-    (v/with [restart inc]
+  (v/handle [condition #(*restart* %)]
+    (binding [*restart* inc]
       (assert (= (condition 1)
                  2))))
   ```")
@@ -31,7 +32,6 @@
   SKIP)
 
 (declare handler-not-found)
-(declare restart-not-found)
 
 (def ^:dynamic *handlers*
   "A map with the available handlers, stored as handler chains. Use `handle`
@@ -40,16 +40,7 @@
   A handler is a function which takes any number of arguments and returns the
   end result. A handler chain is a list of handlers, to be run one at a time
   until the first non-`(skip)` value is returned."
-  {#'handler-not-found (list (partial abort #'handler-not-found))
-   #'restart-not-found (list (partial abort #'restart-not-found))})
-
-(def ^:dynamic *restarts*
-  "A map with the available restarts. Use `with` to install new restarts, and
-  `restart` to run them.
-
-  A restart is a function which recovers from conditions, expected to be called
-  from a handler."
-  {})
+  {#'handler-not-found (list (partial abort #'handler-not-found))})
 
 (defn- run-handler
   "Runs handler chains, returning the first non-(skip) value."
@@ -89,8 +80,6 @@
 
 (defcondition handler-not-found
   "A condition which signals when a handler couldn't be found.")
-(defcondition restart-not-found
-  "A condition which signals when a restart couldn't be found.")
 
 (defn- var-ize
   "For binding-style macros. Converts pairs into a map."
@@ -131,38 +120,8 @@
     {#'*handlers* (merge-bindings *handlers* binding-map)}
     (fn [] (bound-fn* f))))
 
-(defn restart
-  "Searches for a restart mapped to `v`, and then runs it with `args`.
-
-  Signals `restart-not-found` if no restart could be found."
-  [v & args]
-  (if-let [r (get *restarts* v)]
-    (apply r args)
-    (restart-not-found {:condition v :args args})))
-
-(defmacro defrestart
-  "Creates a restart: basically, a function which `restart`s itself when
-  called. `metadata` is expected to be either a doc-string or a metadata map."
-  ([v] `(defrestart ~v {}))
-  ([v metadata]
-   `(def ~(with-meta v (merge (->metadata metadata)
-                              {:arglists `'([& ~'args])}))
-      (partial restart (var ~v)))))
-
-(defmacro with
-  "Installs the given bindings in `*restarts*`, executes `body`, and returns
-  its result."
-  [bindings & body]
-  `(binding [*restarts* (merge *restarts*
-                               (hash-map ~@(var-ize bindings)))]
-     ~@body))
-
-(defn with-fn
-  "Returns a function, which will install the given restarts and then run `f`.
-
-  This may be used to define a helper function which runs on a different
-  thread, but needs the given restarts in place."
+(defn bind-fn
+  "Returns a function, which will install the bindings in `binding-map`
+   and then call `f` with the given arguments."
   [binding-map f]
-  (with-bindings*
-    {#'*restarts* (merge *restarts* binding-map)}
-    (fn [] (bound-fn* f))))
+  (with-bindings* binding-map (fn [] (bound-fn* f))))

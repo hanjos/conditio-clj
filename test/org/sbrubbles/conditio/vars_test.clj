@@ -23,11 +23,8 @@
          (v/skip 1 2 3)
          (v/skip))))
 
-(deftest handlers-and-restarts
-  (is (contains? v/*handlers* #'v/handler-not-found))
-  (is (contains? v/*handlers* #'v/restart-not-found))
-
-  (is (empty? v/*restarts*)))
+(deftest initial-handlers
+  (is (contains? v/*handlers* #'v/handler-not-found)))
 
 (v/defcondition c)
 (v/defcondition c-with-doc "doc")
@@ -52,28 +49,6 @@
        #'c-with-obj :sbrubbles nil
        #'c-with-obj :metadata 42))
 
-(v/defrestart r)
-(v/defrestart r-with-doc "doc")
-(v/defrestart r-with-meta {:sbrubbles 1 :doc "sbrubbles"})
-(v/defrestart r-with-obj 42)
-
-(deftest defrestart-metadata
-  (are [v field val] (= (field (meta v)) val)
-       #'r :doc nil
-       #'r :sbrubbles nil
-       #'r :metadata nil
-
-       #'r-with-doc :doc "doc"
-       #'r-with-doc :sbrubbles nil
-       #'r-with-doc :metadata nil
-
-       #'r-with-meta :doc "sbrubbles"
-       #'r-with-meta :sbrubbles 1
-       #'r-with-meta :metadata nil
-
-       #'r-with-obj :doc nil
-       #'r-with-obj :sbrubbles nil
-       #'r-with-obj :metadata 42))
 
 (deftest handling
   (is (thrown? ExceptionInfo (c 1 2 3)))
@@ -103,41 +78,15 @@
 
   (is (thrown? ExceptionInfo (c 1 2 3))))
 
-(deftest restarting
-  (is (thrown? ExceptionInfo (r 1 2 3)))
+(def ^:dynamic *r* (partial v/abort "No restart defined!"))
 
-  (testing "calling r is the same as calling v/restart"
-    (v/with [r list]
-      (is (= (v/*restarts* #'r)
-             list))
+(deftest handle-with-restarts
+  (v/handle [c #(*r* %)]
+            (binding [*r* inc]
+              (is (= (c 1) 2))))
 
-      (is (= (v/restart #'r 1 2 3)
-             (r 1 2 3)
-             (list 1 2 3)))))
-
-  (testing "v/with-fn and v/with"
-    (let [r-prime (v/with-fn {#'r list}
-                             (fn [& args] (apply r args)))]
-      (is (= (r-prime 1 2 3)
-             (list 1 2 3)))
-
-      (is (thrown? ExceptionInfo (r 1 2 3))))
-
-    (v/with [r v/abort]
-      (let [r-prime (v/with-fn {#'r list}
-                               (fn [& args] (apply r args)))]
-        (is (= (r-prime 1 2 3)
-               (list 1 2 3))))))
-
-  (is (thrown? ExceptionInfo (r 1 2 3))))
-
-(deftest handle-and-with
-  (v/handle [c #(r %)]
-    (v/with [r inc]
-      (is (= (c 1) 2))))
-
-  (v/with [r inc]
-    (v/handle [c #(r %)]
+  (binding [*r* inc]
+    (v/handle [c #(*r* %)]
       (is (= (c 1) 2)))))
 
 (deftest skipping-handlers

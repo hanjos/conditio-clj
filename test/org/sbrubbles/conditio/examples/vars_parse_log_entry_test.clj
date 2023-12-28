@@ -6,21 +6,21 @@
     (clojure.lang ExceptionInfo)))
 
 (v/defcondition malformed-log-entry)
-(v/defrestart retry-with)
-(v/defrestart skip-entry)
+(def ^:dynamic *retry-with*)
+(def ^:dynamic *skip-entry*)
 
-(def ^:dynamic *selected-handler* skip-entry)
+(def ^:dynamic *selected-handler* *skip-entry*)
 
 ;; functions
 
 (defn parse-log-entry [line]
   (if (not (= line :fail))
     (str ">>> " line)
-    (v/with [retry-with parse-log-entry]
+    (binding [*retry-with* parse-log-entry]
       (malformed-log-entry line))))
 
 (defn parse-log-file []
-  (comp (map (v/with-fn {#'skip-entry (fn [] ::skip-entry)}
+  (comp (map (v/bind-fn {#'*skip-entry* (fn [] ::skip-entry)}
                         parse-log-entry))
         (filter #(not (= % ::skip-entry)))))
 
@@ -39,7 +39,7 @@
 (deftest analyze-logs-test
   (are [f input expected] (= (apply f input) expected)
        ; everything except :fail is parsed
-       (select-handler analyze-logs (fn [_] (skip-entry)))
+       (select-handler analyze-logs (fn [_] (*skip-entry*)))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
        [">>> a" ">>> b" ">>> c" ">>> d" ">>> e"]
 
@@ -49,7 +49,7 @@
        [">>> a" ">>> b" ">>> c" "X" "X" "X" ">>> d" "X" ">>> e"]
 
        ; :fail's are reparsed with "X" as input instead
-       (select-handler analyze-logs (fn [_] (retry-with "X")))
+       (select-handler analyze-logs (fn [_] (*retry-with* "X")))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
        [">>> a" ">>> b" ">>> c" ">>> X" ">>> X" ">>> X" ">>> d" ">>> X" ">>> e"]))
 
