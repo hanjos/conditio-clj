@@ -1,12 +1,9 @@
 {:linters {:refer-all         {:exclude [clojure.test]}
-           :unresolved-symbol {:exclude [(org.sbrubbles.conditio.vars/defcondition)
-                                         (org.sbrubbles.conditio.vars/defrestart)]}
+           :unresolved-symbol {:exclude [(org.sbrubbles.conditio.vars/defcondition)]}
            :missing-docstring {:level :warning}}
 
  :lint-as {org.sbrubbles.conditio.vars/defcondition clj-kondo.lint-as/def-catch-all
-           org.sbrubbles.conditio.vars/defrestart   clj-kondo.lint-as/def-catch-all
-           org.sbrubbles.conditio.vars/handle       clojure.core/let
-           org.sbrubbles.conditio.vars/with         clojure.core/let}
+           org.sbrubbles.conditio.vars/handle       clojure.core/let}
 
  :output  {:exclude-files ["README.md" "src/user.clj" "build.clj" "test"]}}
 
