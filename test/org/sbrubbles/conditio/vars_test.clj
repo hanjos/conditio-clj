@@ -82,17 +82,22 @@
 
 (deftest handle-with-restarts
   (v/handle [c #(*r* %)]
-            (binding [*r* inc]
-              (is (= (c 1) 2))))
+    (binding [*r* inc]
+      (is (= (c 1) 2))))
 
   (binding [*r* inc]
     (v/handle [c #(*r* %)]
       (is (= (c 1) 2)))))
 
-(deftest skipping-handlers
-  (v/handle [c inc]
-    (v/handle [c #(if (even? %)
-                    :even
-                    (v/skip))]
-      (is (= (c 1) 2))
-      (is (= (c 2) :even)))))
+(deftest skipping
+  (testing "conditional skipping"
+    (v/handle [c inc]
+      (v/handle [c #(if (even? %)
+                      :even
+                      (v/skip))]
+        (is (= (c 1) 2))
+        (is (= (c 2) :even)))))
+
+  (testing "skip all handlers"
+    (v/handle [c v/skip]
+      (is (thrown? ExceptionInfo (c 1 2 3))))))

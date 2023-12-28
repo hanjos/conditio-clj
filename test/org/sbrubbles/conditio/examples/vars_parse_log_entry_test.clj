@@ -32,24 +32,23 @@
           args)))
 
 ;; helper test fixture
-(defn select-handler [f handler]
-  (binding [*selected-handler* handler]
-    (bound-fn* f)))
+(defn handle-with [f handler]
+  (v/bind-fn {#'*selected-handler* handler} f))
 
 (deftest analyze-logs-test
   (are [f input expected] (= (apply f input) expected)
        ; everything except :fail is parsed
-       (select-handler analyze-logs (fn [_] (*skip-entry*)))
+       (handle-with analyze-logs (fn [_] (*skip-entry*)))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
        [">>> a" ">>> b" ">>> c" ">>> d" ">>> e"]
 
        ; :fail's are replaced with "X", no parsing
-       (select-handler analyze-logs (fn [_] "X"))
+       (handle-with analyze-logs (fn [_] "X"))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
        [">>> a" ">>> b" ">>> c" "X" "X" "X" ">>> d" "X" ">>> e"]
 
        ; :fail's are reparsed with "X" as input instead
-       (select-handler analyze-logs (fn [_] (*retry-with* "X")))
+       (handle-with analyze-logs (fn [_] (*retry-with* "X")))
        [["a" "b"] ["c" :fail :fail] [:fail "d" :fail "e"]]
        [">>> a" ">>> b" ">>> c" ">>> X" ">>> X" ">>> X" ">>> d" ">>> X" ">>> e"]))
 

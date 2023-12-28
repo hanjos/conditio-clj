@@ -37,9 +37,9 @@
   "A map with the available handlers, stored as handler chains. Use `handle`
   to install new handlers.
 
-  A handler is a function which takes any number of arguments and returns the
-  end result. A handler chain is a list of handlers, to be run one at a time
-  until the first non-`(skip)` value is returned."
+  A handler is a function which may take some arguments and return the end
+  result. A handler chain is a list of handlers, to be run one at a time until
+  the first non-`(skip)` value is returned."
   {#'handler-not-found (list (partial abort #'handler-not-found))})
 
 (defn- run-handler
@@ -97,16 +97,24 @@
   (reduce-kv (fn [acc k v]
                (assoc acc k (if (contains? acc k)
                               (conj (get acc k) v)
-                              (list v))))
+                              (list v (fn [& _]
+                                        (handler-not-found {:condition k}))))))
              chain-map
              bindings))
+
+(defn bind-fn
+  "Returns a function, which will install the bindings in `binding-map`
+   and then call `f` with the given arguments."
+  [binding-map f]
+  (with-bindings binding-map (bound-fn* f)))
 
 (defmacro handle
   "Installs the given bindings in `*handlers*`, executes `body`, and returns
   its result."
   [bindings & body]
-  `(binding [*handlers* (~merge-bindings *handlers*
-                                         (hash-map ~@(var-ize bindings)))]
+  `(binding [*handlers* (~merge-bindings
+                          *handlers*
+                          (hash-map ~@(var-ize bindings)))]
      ~@body))
 
 (defn handle-fn
@@ -116,12 +124,5 @@
   This may be used to define a helper function which runs on a different
   thread, but needs the given handlers in place."
   [binding-map f]
-  (with-bindings*
-    {#'*handlers* (merge-bindings *handlers* binding-map)}
-    (fn [] (bound-fn* f))))
-
-(defn bind-fn
-  "Returns a function, which will install the bindings in `binding-map`
-   and then call `f` with the given arguments."
-  [binding-map f]
-  (with-bindings* binding-map (fn [] (bound-fn* f))))
+  (bind-fn {#'*handlers* (merge-bindings *handlers* binding-map)}
+           f))
