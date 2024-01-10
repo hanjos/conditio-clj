@@ -9,7 +9,7 @@
 ;; functions
 
 (defn parse-log-entry [line]
-  (if (not (= line :fail))
+  (if (not= line :fail)
     (str ">>> " line)
     (c/with [::retry-with parse-log-entry]
             (c/signal ::malformed-log-entry :line line))))
@@ -17,7 +17,7 @@
 (defn parse-log-file []
   (comp (map (c/with-fn {::skip-entry (fn [] ::skip-entry)}
                         parse-log-entry))
-        (filter #(not (= % ::skip-entry)))))
+        (filter #(not= % ::skip-entry))))
 
 (defn analyze-logs [& args]
   (c/handle [::malformed-log-entry *selected-handler*]

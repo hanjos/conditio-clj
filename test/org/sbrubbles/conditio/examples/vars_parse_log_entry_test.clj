@@ -14,7 +14,7 @@
 ;; functions
 
 (defn parse-log-entry [line]
-  (if (not (= line :fail))
+  (if (not= line :fail)
     (str ">>> " line)
     (binding [*retry-with* parse-log-entry]
       (malformed-log-entry line))))
@@ -22,7 +22,7 @@
 (defn parse-log-file []
   (comp (map (v/bind-fn {#'*skip-entry* (fn [] ::skip-entry)}
                         parse-log-entry))
-        (filter #(not (= % ::skip-entry)))))
+        (filter #(not= % ::skip-entry))))
 
 (defn analyze-logs [& args]
   (v/handle [malformed-log-entry *selected-handler*]
