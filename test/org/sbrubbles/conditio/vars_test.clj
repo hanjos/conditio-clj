@@ -55,8 +55,8 @@
 
   (testing "calling c is the same as calling v/signal"
     (v/handle [c list]
-      (is (= (v/*handlers* #'c)
-             (list list)))
+      (is (= (peek (v/*handlers* #'c))
+             list))
 
       (is (= (v/signal #'c 1 2 3)
              (c 1 2 3)
