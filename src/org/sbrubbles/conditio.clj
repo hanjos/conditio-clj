@@ -64,8 +64,8 @@
   "A map with the available restarts. Use `with` to install new restarts, and
   `restart` to run them.
 
-  A restart is a function which recovers from conditions, expected to be called
-  from a handler."
+  A restart is a function which recovers from conditions, and expects to be
+  called from a handler."
   {})
 
 (defn- bind-fn
